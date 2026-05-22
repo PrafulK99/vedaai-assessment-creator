@@ -3,14 +3,29 @@
 import React from "react";
 import { MainLayout } from "@/components/MainLayout";
 import { UploadCloud, Calendar, ChevronDown, Minus, Plus, X, Mic, ArrowLeft, ArrowRight } from "lucide-react";
+import { useFormStore, QuestionType } from "@/store/useFormStore";
 
 export default function CreateAssignment() {
-  const questions = [
-    { type: "Multiple Choice Questions", count: 4, marks: 1 },
-    { type: "Short Questions", count: 3, marks: 2 },
-    { type: "Diagram/Graph-Based Questions", count: 5, marks: 5 },
-    { type: "Numerical Problems", count: 5, marks: 5 },
-  ];
+  const {
+    title,
+    dueDate,
+    instructions,
+    questions,
+    file,
+    setField,
+    addQuestionType,
+    updateQuestionType,
+    removeQuestionType
+  } = useFormStore();
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setField('file', e.target.files[0]);
+    }
+  };
+
+  const totalQuestions = questions.reduce((acc, q) => acc + q.count, 0);
+  const totalMarks = questions.reduce((acc, q) => acc + q.count * q.marks, 0);
 
   return (
     <MainLayout headerTitle="Assignment" showBackButton={true}>
@@ -36,20 +51,46 @@ export default function CreateAssignment() {
           </div>
 
           {/* Upload Zone */}
-          <div className="border border-dashed border-gray-300 rounded-[1.5rem] p-10 flex flex-col items-center justify-center text-center mt-6">
+          <div className="border border-dashed border-gray-300 rounded-[1.5rem] p-10 flex flex-col items-center justify-center text-center mt-6 relative">
+            <input 
+              type="file" 
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              onChange={handleFileChange}
+              accept=".pdf,.png,.jpg,.jpeg,.txt"
+            />
             <UploadCloud className="w-6 h-6 text-gray-800 mb-3" />
-            <p className="text-gray-900 font-semibold text-[13px] mb-1">Choose a file or drag & drop it here</p>
-            <p className="text-gray-400 text-[11px] mb-4">JPEG, PNG, upto 10MB</p>
-            <button className="border border-gray-200 rounded-full px-5 py-2 text-[12px] font-semibold text-gray-700 hover:bg-gray-50 transition-colors shadow-sm">Browse Files</button>
+            <p className="text-gray-900 font-semibold text-[13px] mb-1">
+              {file ? file.name : "Choose a file or drag & drop it here"}
+            </p>
+            <p className="text-gray-400 text-[11px] mb-4">PDF, TXT, JPEG, PNG, upto 10MB</p>
+            <button className="border border-gray-200 rounded-full px-5 py-2 text-[12px] font-semibold text-gray-700 hover:bg-gray-50 transition-colors shadow-sm pointer-events-none">
+              {file ? "Change File" : "Browse Files"}
+            </button>
           </div>
-          <p className="text-center text-[11px] font-medium text-gray-400 mt-4 mb-8">Upload images of your preferred document/image</p>
+          <p className="text-center text-[11px] font-medium text-gray-400 mt-4 mb-8">Upload source documents or images to generate questions</p>
+
+          {/* Title */}
+          <div className="mb-6">
+            <label className="block text-[13px] font-bold text-gray-900 mb-3">Assignment Title</label>
+            <input 
+              type="text" 
+              placeholder="e.g. Midterm Physics Assessment" 
+              value={title}
+              onChange={(e) => setField('title', e.target.value)}
+              className="w-full border border-gray-200 rounded-2xl py-3.5 px-4 text-[13px] font-medium text-gray-900 outline-none focus:border-gray-400 transition-colors" 
+            />
+          </div>
 
           {/* Due Date */}
           <div className="mb-6">
             <label className="block text-[13px] font-bold text-gray-900 mb-3">Due Date</label>
             <div className="relative">
-              <input type="text" placeholder="DD-MM-YYYY" className="w-full border border-gray-200 rounded-2xl py-3.5 px-4 text-[13px] font-medium text-gray-400 outline-none focus:border-gray-400 transition-colors" />
-              <Calendar className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-800 pointer-events-none" />
+              <input 
+                type="date" 
+                value={dueDate}
+                onChange={(e) => setField('dueDate', e.target.value)}
+                className="w-full border border-gray-200 rounded-2xl py-3.5 px-4 text-[13px] font-medium text-gray-900 outline-none focus:border-gray-400 transition-colors bg-transparent appearance-none" 
+              />
             </div>
           </div>
 
@@ -66,33 +107,66 @@ export default function CreateAssignment() {
                 <div key={i} className="flex items-center gap-4">
                   {/* Select Dropdown */}
                   <div className="flex-1 relative">
-                    <select className="w-full appearance-none border border-gray-200 rounded-2xl py-3.5 px-4 text-[13px] font-medium text-gray-900 bg-white outline-none focus:border-gray-400 cursor-pointer">
-                      <option>{q.type}</option>
+                    <select 
+                      value={q.type}
+                      onChange={(e) => updateQuestionType(i, { ...q, type: e.target.value })}
+                      className="w-full appearance-none border border-gray-200 rounded-2xl py-3.5 px-4 text-[13px] font-medium text-gray-900 bg-white outline-none focus:border-gray-400 cursor-pointer"
+                    >
+                      <option value="Multiple Choice">Multiple Choice</option>
+                      <option value="Short Questions">Short Questions</option>
+                      <option value="Long Questions">Long Questions</option>
+                      <option value="Diagram/Graph-Based">Diagram/Graph-Based</option>
+                      <option value="Numerical Problems">Numerical Problems</option>
                     </select>
                     <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-800 pointer-events-none" />
                   </div>
                   
-                  <X className="w-3.5 h-3.5 text-gray-400 shrink-0" strokeWidth={2.5} />
+                  <button onClick={() => removeQuestionType(i)}>
+                    <X className="w-3.5 h-3.5 text-gray-400 shrink-0 hover:text-red-500" strokeWidth={2.5} />
+                  </button>
                   
                   {/* Counter: No. of Questions */}
                   <div className="w-30 flex items-center justify-between border border-gray-200 rounded-full px-4 py-2.5 bg-white">
-                    <button className="text-gray-300 hover:text-gray-600"><Minus className="w-3.5 h-3.5" strokeWidth={2.5} /></button>
+                    <button 
+                      onClick={() => updateQuestionType(i, { ...q, count: Math.max(1, q.count - 1) })}
+                      className="text-gray-300 hover:text-gray-600"
+                    >
+                      <Minus className="w-3.5 h-3.5" strokeWidth={2.5} />
+                    </button>
                     <span className="text-[13px] font-bold text-gray-900">{q.count}</span>
-                    <button className="text-gray-300 hover:text-gray-600"><Plus className="w-3.5 h-3.5" strokeWidth={2.5} /></button>
+                    <button 
+                      onClick={() => updateQuestionType(i, { ...q, count: q.count + 1 })}
+                      className="text-gray-300 hover:text-gray-600"
+                    >
+                      <Plus className="w-3.5 h-3.5" strokeWidth={2.5} />
+                    </button>
                   </div>
                   
                   {/* Counter: Marks */}
                   <div className="w-30 flex items-center justify-between border border-gray-200 rounded-full px-4 py-2.5 bg-white">
-                    <button className="text-gray-300 hover:text-gray-600"><Minus className="w-3.5 h-3.5" strokeWidth={2.5} /></button>
+                    <button 
+                      onClick={() => updateQuestionType(i, { ...q, marks: Math.max(1, q.marks - 1) })}
+                      className="text-gray-300 hover:text-gray-600"
+                    >
+                      <Minus className="w-3.5 h-3.5" strokeWidth={2.5} />
+                    </button>
                     <span className="text-[13px] font-bold text-gray-900">{q.marks}</span>
-                    <button className="text-gray-300 hover:text-gray-600"><Plus className="w-3.5 h-3.5" strokeWidth={2.5} /></button>
+                    <button 
+                      onClick={() => updateQuestionType(i, { ...q, marks: q.marks + 1 })}
+                      className="text-gray-300 hover:text-gray-600"
+                    >
+                      <Plus className="w-3.5 h-3.5" strokeWidth={2.5} />
+                    </button>
                   </div>
                 </div>
               ))}
             </div>
             
             <div className="mt-5">
-              <button className="flex items-center gap-2.5 text-[13px] font-bold text-gray-900 hover:opacity-80 transition-opacity">
+              <button 
+                onClick={() => addQuestionType({ type: "Short Questions", count: 1, marks: 2 })}
+                className="flex items-center gap-2.5 text-[13px] font-bold text-gray-900 hover:opacity-80 transition-opacity"
+              >
                 <div className="bg-black text-white rounded-full p-0.75">
                   <Plus className="w-3.5 h-3.5" strokeWidth={3} />
                 </div>
@@ -101,8 +175,8 @@ export default function CreateAssignment() {
             </div>
             
             <div className="mt-8 flex flex-col items-end gap-2 text-[13px] font-bold text-gray-900 pr-2">
-              <div>Total Questions : 25</div>
-              <div>Total Marks : 60</div>
+              <div>Total Questions : {totalQuestions}</div>
+              <div>Total Marks : {totalMarks}</div>
             </div>
           </div>
 
@@ -112,7 +186,9 @@ export default function CreateAssignment() {
             <div className="relative">
               <textarea 
                 placeholder="e.g Generate a question paper for 3 hour exam duration..." 
-                className="w-full border border-dashed border-gray-300 rounded-[1.5rem] py-4 px-5 text-[13px] font-medium text-gray-400 outline-none resize-none h-24 focus:border-gray-400 transition-colors placeholder:font-normal"
+                value={instructions}
+                onChange={(e) => setField('instructions', e.target.value)}
+                className="w-full border border-dashed border-gray-300 rounded-[1.5rem] py-4 px-5 text-[13px] font-medium text-gray-900 outline-none resize-none h-24 focus:border-gray-400 transition-colors placeholder:text-gray-400 placeholder:font-normal"
               ></textarea>
               <button className="absolute bottom-4 right-5 text-gray-800 hover:text-black">
                 <Mic className="w-4.5 h-4.5 fill-current" />
