@@ -4,8 +4,10 @@ import React from "react";
 import { MainLayout } from "@/components/MainLayout";
 import { UploadCloud, Calendar, ChevronDown, Minus, Plus, X, Mic, ArrowLeft, ArrowRight } from "lucide-react";
 import { useFormStore, QuestionType } from "@/store/useFormStore";
+import { useRouter } from "next/navigation";
 
 export default function CreateAssignment() {
+  const router = useRouter();
   const {
     title,
     dueDate,
@@ -199,10 +201,16 @@ export default function CreateAssignment() {
 
         {/* Footer Buttons */}
         <div className="flex justify-between items-center mt-7 ml-5.5">
-          <button className="bg-white text-gray-900 font-semibold text-[13px] py-3.5 px-6 rounded-full flex items-center gap-2 hover:bg-gray-50 transition-colors shadow-sm">
+          <button 
+            onClick={() => router.back()}
+            className="bg-white text-gray-900 font-semibold text-[13px] py-3.5 px-6 rounded-full flex items-center gap-2 hover:bg-gray-50 transition-colors shadow-sm"
+          >
              <ArrowLeft className="w-4 h-4" /> Previous
           </button>
-          <button className="bg-[#1c1c1c] text-white font-semibold text-[13px] py-3.5 px-8 rounded-full flex items-center gap-2 hover:bg-black transition-colors shadow-[0_4px_14px_rgba(0,0,0,0.1)]">
+          <button 
+            onClick={() => router.push('/generate')}
+            className="bg-[#1c1c1c] text-white font-semibold text-[13px] py-3.5 px-8 rounded-full flex items-center gap-2 hover:bg-black transition-colors shadow-[0_4px_14px_rgba(0,0,0,0.1)]"
+          >
              Next <ArrowRight className="w-4 h-4" />
           </button>
         </div>
