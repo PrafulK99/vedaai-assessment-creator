@@ -199,3 +199,15 @@ export const getAssessment = asyncHandler(
     });
   }
 );
+
+// Get all generated assessments
+export const getAllAssessments = asyncHandler(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const assessments = await GeneratedAssessment.find({}, { sections: 0 }).sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      data: assessments,
+    });
+  }
+);

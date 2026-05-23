@@ -26,3 +26,9 @@ export const getAssessment = async (assessmentId: string) => {
   if (!res.ok) throw new Error('Failed to fetch assessment');
   return res.json();
 };
+
+export const getAllAssessments = async () => {
+  const res = await fetch(`${API_URL}/assessments`);
+  if (!res.ok) throw new Error('Failed to fetch assessments');
+  return res.json();
+};

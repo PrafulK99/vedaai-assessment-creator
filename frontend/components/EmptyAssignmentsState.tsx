@@ -1,7 +1,7 @@
 import React from "react";
 import { Search } from "lucide-react";
 
-export function EmptyAssignmentsState() {
+export function EmptyAssignmentsState({ onAction }: { onAction?: () => void }) {
   return (
     <div className="flex-1 flex flex-col items-center justify-center px-6">
       {/* Illustration */}
@@ -67,7 +67,7 @@ export function EmptyAssignmentsState() {
       </p>
 
       {/* CTA Button */}
-      <button className="bg-gray-900 hover:bg-gray-800 text-white font-semibold py-3 px-8 rounded-full flex items-center gap-2 transition-all shadow-lg hover:shadow-xl active:scale-95">
+      <button onClick={onAction} className="bg-gray-900 hover:bg-gray-800 text-white font-semibold py-3 px-8 rounded-full flex items-center gap-2 transition-all shadow-lg hover:shadow-xl active:scale-95">
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
         </svg>
