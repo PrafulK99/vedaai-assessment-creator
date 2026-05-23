@@ -4,6 +4,7 @@ import { GenerationJob } from "../models/GenerationJob.js";
 import { GeneratedAssessment } from "../models/GeneratedAssessment.js";
 import type { AssessmentJobData } from "../queues/assessmentQueue.js";
 import { generateAssessmentWithGemini } from "../services/geminiService.js";
+import { emitJobProgress, emitJobCompleted, emitJobFailed } from "../sockets/assessmentSocket.js";
 
 // Generate assessment using Gemini AI
 const generateAssessmentWithAI = async (jobData: AssessmentJobData) => {
@@ -98,6 +99,7 @@ const assessmentWorker = new Worker<AssessmentJobData>(
         generationJob.status = "processing";
         generationJob.currentMessage = "Starting assessment generation...";
         await generationJob.save();
+        emitJobProgress(job.data.jobId, 10, "Starting assessment generation...");
       }
 
       // Simulate progress updates
@@ -119,6 +121,7 @@ const assessmentWorker = new Worker<AssessmentJobData>(
           generationJob.progress = step.progress;
           generationJob.currentMessage = step.message;
           await generationJob.save();
+          emitJobProgress(job.data.jobId, step.progress, step.message);
         }
       }
 
@@ -145,6 +148,8 @@ const assessmentWorker = new Worker<AssessmentJobData>(
         generationJob.currentMessage = "Assessment generated successfully!";
         generationJob.completedAt = new Date();
         await generationJob.save();
+        emitJobProgress(job.data.jobId, 100, "Assessment generated successfully!");
+        emitJobCompleted(job.data.jobId, assessment._id.toString());
       }
 
       console.log(`✅ Job ${job.id} completed successfully`);
@@ -160,6 +165,7 @@ const assessmentWorker = new Worker<AssessmentJobData>(
         generationJob.status = "failed";
         generationJob.error = error instanceof Error ? error.message : "Unknown error";
         await generationJob.save();
+        emitJobFailed(job.data.jobId, generationJob.error);
       }
 
       throw error;

@@ -7,11 +7,13 @@
 
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
-    "module": "es2022",
+    "module": "nodenext",
     "target": "es2022",
+    "moduleResolution": "nodenext",
     "types": ["node"],
     // For nodejs:
     "lib": ["esnext"],
+    "esModuleInterop": true,
 
     // Other Outputs
     "sourceMap": true,

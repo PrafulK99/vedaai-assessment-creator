@@ -4,8 +4,11 @@ import React from "react";
 import { MainLayout } from "@/components/MainLayout";
 import { UploadCloud, Calendar, ChevronDown, Minus, Plus, X, Mic, ArrowLeft, ArrowRight } from "lucide-react";
 import { useFormStore, QuestionType } from "@/store/useFormStore";
+import { useGenerationStore } from "@/store/useGenerationStore";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { createAssignment, generateAssessment } from "@/lib/api";
+import { useState } from "react";
 
 export default function CreateAssignment() {
   const router = useRouter();
@@ -21,6 +24,9 @@ export default function CreateAssignment() {
     removeQuestionType
   } = useFormStore();
 
+  const { setJobId, setStatus, setProgress } = useGenerationStore();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       setField('file', e.target.files[0]);
@@ -30,7 +36,7 @@ export default function CreateAssignment() {
   const totalQuestions = questions.reduce((acc, q) => acc + q.count, 0);
   const totalMarks = questions.reduce((acc, q) => acc + q.count * q.marks, 0);
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (!title.trim()) {
       toast.error("Assignment Title is required");
       return;
@@ -50,7 +56,33 @@ export default function CreateAssignment() {
        return;
     }
 
-    router.push('/generate');
+    try {
+      setIsSubmitting(true);
+      
+      const assignmentData = {
+        title,
+        dueDate,
+        instructions,
+        questions,
+        fileName: file ? file.name : null,
+      };
+
+      const resAssignment = await createAssignment(assignmentData);
+      const assignmentId = resAssignment.data.id;
+
+      const resGeneration = await generateAssessment(assignmentId);
+      const jobId = resGeneration.data.jobId;
+
+      setJobId(jobId);
+      setStatus('queued');
+      setProgress(0, 'Job queued...');
+
+      router.push('/generate');
+    } catch (error: any) {
+      toast.error(error.message || "Something went wrong");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -233,9 +265,10 @@ export default function CreateAssignment() {
           </button>
           <button 
             onClick={handleNext}
-            className="bg-[#1c1c1c] text-white font-semibold text-[13px] py-3.5 px-8 rounded-full flex items-center gap-2 hover:bg-black transition-colors shadow-[0_4px_14px_rgba(0,0,0,0.1)]"
+            disabled={isSubmitting}
+            className="bg-[#1c1c1c] text-white font-semibold text-[13px] py-3.5 px-8 rounded-full flex items-center gap-2 hover:bg-black transition-colors shadow-[0_4px_14px_rgba(0,0,0,0.1)] disabled:opacity-70 disabled:cursor-not-allowed"
           >
-             Next <ArrowRight className="w-4 h-4" />
+             {isSubmitting ? "Submitting..." : "Next"} <ArrowRight className="w-4 h-4" />
           </button>
         </div>
       </div>
