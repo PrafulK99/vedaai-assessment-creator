@@ -7,50 +7,59 @@ import { useRouter } from "next/navigation";
 import { CheckCircle2, Loader2, AlertCircle } from "lucide-react";
 import { useAssessmentStore } from "@/store/useAssessmentStore";
 import { Skeleton } from "@/components/ui/skeleton";
+import { io, Socket } from "socket.io-client";
+import { getAssessment } from "@/lib/api";
 
 export default function GenerationStatus() {
   const router = useRouter();
-  const { progress, message, status, setProgress, setStatus, setError } = useGenerationStore();
+  const { currentJobId, progress, message, status, setProgress, setStatus, setError } = useGenerationStore();
   const { setAssessment } = useAssessmentStore();
 
-  // Mocking the generation progress for now
   useEffect(() => {
-    setStatus('processing');
-    setProgress(10, "Analyzing Instructions...");
+    if (!currentJobId) {
+      router.push('/create');
+      return;
+    }
 
-    const timeouts = [
-      setTimeout(() => setProgress(30, "Extracting text from documents..."), 2000),
-      setTimeout(() => setProgress(50, "Generating Questions..."), 4500),
-      setTimeout(() => setProgress(75, "Structuring Assessment..."), 7000),
-      setTimeout(() => setProgress(90, "Finalizing Output..."), 9500),
-      setTimeout(() => {
-        setProgress(100, "Generation Complete!");
-        setStatus('completed');
-        
-        // Mock output saving
-        setAssessment({
-          title: "Mock Physics Midterm",
-          sections: [
-            {
-              id: "sec_1",
-              instructions: "Answer all questions",
-              questions: [
-                {
-                  id: "q_1",
-                  text: "What is the speed of light?",
-                  type: "Multiple Choice",
-                  difficulty: "easy",
-                  marks: 1
-                }
-              ]
-            }
-          ]
-        });
-      }, 11000)
-    ];
+    const API_URL = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5000';
+    const socket: Socket = io(API_URL);
 
-    return () => timeouts.forEach(clearTimeout);
-  }, []);
+    socket.on('connect', () => {
+      console.log('Connected to socket server');
+      socket.emit('join-job', currentJobId);
+      setStatus('processing');
+    });
+
+    socket.on('generation-progress', (data: { progress: number; message: string }) => {
+      setProgress(data.progress, data.message);
+    });
+
+    socket.on('generation-completed', async (data: { assessmentId: string }) => {
+      setProgress(100, "Generation Complete!");
+      setStatus('completed');
+      
+      try {
+        const res = await getAssessment(data.assessmentId);
+        setAssessment(res.data);
+        // Automatically redirect after a short delay
+        setTimeout(() => {
+          router.push('/output');
+        }, 1500);
+      } catch (err) {
+        console.error('Failed to fetch generated assessment', err);
+        setError('Failed to fetch final assessment');
+      }
+    });
+
+    socket.on('generation-failed', (data: { error: string }) => {
+      setError(data.error || 'Generation failed unexpectedly');
+    });
+
+    return () => {
+      socket.emit('leave-job', currentJobId);
+      socket.disconnect();
+    };
+  }, [currentJobId, router, setAssessment, setError, setProgress, setStatus]);
 
   return (
     <MainLayout headerTitle="Generating Assignment" showBackButton={false}>
