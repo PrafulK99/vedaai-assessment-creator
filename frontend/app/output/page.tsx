@@ -1,15 +1,17 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { MainLayout } from "@/components/MainLayout";
 import { useAssessmentStore } from "@/store/useAssessmentStore";
 import { useRouter } from "next/navigation";
-import { Download, RefreshCw, Share2, ArrowLeft, Printer } from "lucide-react";
+import { Download, RefreshCw, Share2, Printer, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function AssessmentOutput() {
   const router = useRouter();
   const { generatedAssessment } = useAssessmentStore();
+  const pdfRef = useRef<HTMLDivElement>(null);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
   useEffect(() => {
     // If no assessment exists (e.g. user refreshed the page directly on /output), redirect back to /create
@@ -24,6 +26,50 @@ export default function AssessmentOutput() {
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleDownloadPDF = async () => {
+    if (!pdfRef.current || !generatedAssessment) return;
+    
+    try {
+      setIsGeneratingPDF(true);
+      toast.info("Generating PDF... Please wait.");
+
+      // Dynamically import the modern libraries
+      const { toPng } = await import("html-to-image");
+      const { jsPDF } = await import("jspdf");
+
+      // html-to-image uses the browser's native rendering engine via SVG foreignObject, 
+      // completely bypassing the old html2canvas CSS parsing crashes!
+      const dataUrl = await toPng(pdfRef.current, { 
+        quality: 0.98,
+        backgroundColor: '#ffffff',
+        style: {
+          margin: '0', // Reset any margins that might affect the capture
+        }
+      });
+      
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4"
+      });
+
+      const imgProps = pdf.getImageProperties(dataUrl);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      
+      // Add the captured image to the PDF
+      pdf.addImage(dataUrl, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`${generatedAssessment.title.replace(/\s+/g, '_')}_Assessment.pdf`);
+      
+      toast.success("PDF Downloaded successfully!");
+    } catch (error) {
+      console.error("PDF generation failed:", error);
+      toast.error("Failed to generate PDF. Please try printing instead.");
+    } finally {
+      setIsGeneratingPDF(false);
+    }
   };
 
   const handleShare = () => {
@@ -67,15 +113,27 @@ export default function AssessmentOutput() {
             </button>
             <button 
               onClick={handlePrint}
-              className="flex items-center gap-2 px-6 py-2.5 bg-[#1c1c1c] text-white rounded-xl text-sm font-semibold hover:bg-black transition-colors shadow-md"
+              className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
             >
-              <Printer className="w-4 h-4" /> Print / PDF
+              <Printer className="w-4 h-4" /> Print
+            </button>
+            <button 
+              onClick={handleDownloadPDF}
+              disabled={isGeneratingPDF}
+              className="flex items-center gap-2 px-6 py-2.5 bg-[#1c1c1c] text-white rounded-xl text-sm font-semibold hover:bg-black transition-colors shadow-md disabled:opacity-70"
+            >
+              {isGeneratingPDF ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />} 
+              {isGeneratingPDF ? "Generating..." : "Download PDF"}
             </button>
           </div>
         </div>
 
         {/* Exam Paper Container */}
-        <div className="bg-white rounded-none sm:rounded-[2rem] shadow-sm sm:shadow-lg w-full min-h-264 print:shadow-none print:m-0 print:p-0 print:w-full">
+        <div 
+          id="pdf-container"
+          ref={pdfRef}
+          className="bg-white rounded-none sm:rounded-[2rem] shadow-sm sm:shadow-lg w-full min-h-264 print:shadow-none print:m-0 print:p-0 print:w-full"
+        >
           
           <div className="p-8 sm:p-14 print:p-0">
             {/* Exam Header */}

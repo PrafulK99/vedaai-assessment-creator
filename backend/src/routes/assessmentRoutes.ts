@@ -5,6 +5,7 @@ import {
   generateAssessment,
   getJobStatus,
   getAssessment,
+  getAllAssessments,
 } from "../controllers/assessmentController.js";
 
 const router = Router();
@@ -16,6 +17,7 @@ router.get("/assignments/:id", getAssignment);
 // Generation routes
 router.post("/assignments/:id/generate", generateAssessment);
 router.get("/jobs/:jobId", getJobStatus);
+router.get("/assessments", getAllAssessments);
 router.get("/assessments/:assessmentId", getAssessment);
 
 export default router;
