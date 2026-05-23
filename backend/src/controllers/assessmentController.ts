@@ -4,6 +4,7 @@ import { GenerationJob } from "../models/GenerationJob.js";
 import { GeneratedAssessment } from "../models/GeneratedAssessment.js";
 import { User } from "../models/User.js";
 import { asyncHandler, validationErrorHandler } from "../utils/errorHandler.js";
+import { assessmentQueue } from "../queues/assessmentQueue.js";
 import { v4 as uuidv4 } from "uuid";
 
 // Get or create user (for now, simplified)
@@ -108,6 +109,8 @@ export const generateAssessment = asyncHandler(
     }
 
     const jobId = uuidv4();
+    
+    // Create job record in database
     const generationJob = new GenerationJob({
       jobId,
       assignmentId: assignment._id,
@@ -116,6 +119,30 @@ export const generateAssessment = asyncHandler(
     });
 
     await generationJob.save();
+
+    // Queue the job in BullMQ for processing (don't await - let it process in background)
+    assessmentQueue.add(
+      "generate-assessment",
+      {
+        assignmentId: assignment._id.toString(),
+        userId: assignment.userId.toString(),
+        jobId,
+        title: assignment.title,
+        instructions: assignment.instructions,
+        totalQuestions: assignment.totalQuestions,
+        totalMarks: assignment.totalMarks,
+      },
+      {
+        jobId: jobId,
+        attempts: 3,
+        backoff: {
+          type: "exponential",
+          delay: 2000,
+        },
+      }
+    ).catch((err) => {
+      console.error(`❌ Failed to queue job ${jobId}:`, err);
+    });
 
     res.status(202).json({
       success: true,

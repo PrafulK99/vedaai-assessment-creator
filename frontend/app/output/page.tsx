@@ -5,6 +5,7 @@ import { MainLayout } from "@/components/MainLayout";
 import { useAssessmentStore } from "@/store/useAssessmentStore";
 import { useRouter } from "next/navigation";
 import { Download, RefreshCw, Share2, ArrowLeft, Printer } from "lucide-react";
+import { toast } from "sonner";
 
 export default function AssessmentOutput() {
   const router = useRouter();
@@ -23,6 +24,11 @@ export default function AssessmentOutput() {
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleShare = () => {
+    navigator.clipboard.writeText(window.location.href);
+    toast.success("Link copied to clipboard!");
   };
 
   const difficultyColors = {
@@ -47,6 +53,12 @@ export default function AssessmentOutput() {
           </div>
           
           <div className="flex items-center gap-3">
+            <button 
+              onClick={handleShare}
+              className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors hidden sm:flex"
+            >
+              <Share2 className="w-4 h-4" /> Share
+            </button>
             <button 
               onClick={() => router.push("/create")}
               className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"

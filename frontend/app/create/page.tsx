@@ -5,6 +5,7 @@ import { MainLayout } from "@/components/MainLayout";
 import { UploadCloud, Calendar, ChevronDown, Minus, Plus, X, Mic, ArrowLeft, ArrowRight } from "lucide-react";
 import { useFormStore, QuestionType } from "@/store/useFormStore";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function CreateAssignment() {
   const router = useRouter();
@@ -28,6 +29,29 @@ export default function CreateAssignment() {
 
   const totalQuestions = questions.reduce((acc, q) => acc + q.count, 0);
   const totalMarks = questions.reduce((acc, q) => acc + q.count * q.marks, 0);
+
+  const handleNext = () => {
+    if (!title.trim()) {
+      toast.error("Assignment Title is required");
+      return;
+    }
+    if (!dueDate) {
+      toast.error("Due Date is required");
+      return;
+    }
+    if (questions.length === 0) {
+      toast.error("At least one question type is required");
+      return;
+    }
+    
+    // Check if total marks is valid (greater than 0)
+    if (totalMarks <= 0) {
+       toast.error("Total marks must be greater than 0");
+       return;
+    }
+
+    router.push('/generate');
+  };
 
   return (
     <MainLayout headerTitle="Assignment" showBackButton={true}>
@@ -208,7 +232,7 @@ export default function CreateAssignment() {
              <ArrowLeft className="w-4 h-4" /> Previous
           </button>
           <button 
-            onClick={() => router.push('/generate')}
+            onClick={handleNext}
             className="bg-[#1c1c1c] text-white font-semibold text-[13px] py-3.5 px-8 rounded-full flex items-center gap-2 hover:bg-black transition-colors shadow-[0_4px_14px_rgba(0,0,0,0.1)]"
           >
              Next <ArrowRight className="w-4 h-4" />

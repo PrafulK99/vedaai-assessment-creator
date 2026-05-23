@@ -1,11 +1,14 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+
+// Load env vars IMMEDIATELY
+dotenv.config();
+
 import connectDB from "./config/database.js";
 import assessmentRoutes from "./routes/assessmentRoutes.js";
 import { errorHandler } from "./utils/errorHandler.js";
-
-dotenv.config();
+import assessmentWorker from "./workers/assessmentWorker.js";
 
 const app = express();
 
@@ -29,8 +32,8 @@ app.get("/health", (_, res) => {
   res.json({ status: "healthy", timestamp: new Date() });
 });
 
-// 404 handler
-app.use("*", (_, res) => {
+// 404 handler - must come before error handler
+app.use((_, res) => {
   res.status(404).json({ success: false, message: "Route not found" });
 });
 
