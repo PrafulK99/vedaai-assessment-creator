@@ -20,6 +20,10 @@ export interface IGeneratedAssessment extends Document {
   assignmentId: mongoose.Types.ObjectId;
   jobId: string;
   title: string;
+  schoolName: string;
+  subject: string;
+  classLevel: string;
+  timeAllowed: string;
   sections: Section[];
   totalQuestions: number;
   totalMarks: number;
@@ -57,6 +61,10 @@ const generatedAssessmentSchema = new Schema<IGeneratedAssessment>(
     },
     jobId: { type: String, required: true, unique: true },
     title: { type: String, required: true },
+    schoolName: { type: String, default: "" },
+    subject: { type: String, default: "" },
+    classLevel: { type: String, default: "" },
+    timeAllowed: { type: String, default: "" },
     sections: [sectionSchema],
     totalQuestions: { type: Number, default: 0 },
     totalMarks: { type: Number, default: 0 },

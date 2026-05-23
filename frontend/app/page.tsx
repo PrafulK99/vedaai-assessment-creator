@@ -3,21 +3,25 @@
 import React, { useEffect, useState } from "react";
 import { MainLayout } from "@/components/MainLayout";
 import { EmptyAssignmentsState } from "@/components/EmptyAssignmentsState";
-import { getAllAssessments, getAssessment } from "@/lib/api";
+import { getAllAssessments, getAssessment, deleteAssessment } from "@/lib/api";
 import { useAssessmentStore } from "@/store/useAssessmentStore";
 import { useRouter } from "next/navigation";
-import { FileText, Clock, CheckCircle, XCircle, Loader2, ArrowRight } from "lucide-react";
+import { Loader2, ArrowRight, Trash2, Filter, Search, MoreVertical, Plus } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Home() {
   const [assessments, setAssessments] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isOpeningId, setIsOpeningId] = useState<string | null>(null);
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const router = useRouter();
   const { setAssessment } = useAssessmentStore();
 
   useEffect(() => {
     fetchAssessments();
+
+    const handleClickOutside = () => setOpenMenuId(null);
+    window.addEventListener('click', handleClickOutside);
+    return () => window.removeEventListener('click', handleClickOutside);
   }, []);
 
   const fetchAssessments = async () => {
@@ -32,112 +36,166 @@ export default function Home() {
     }
   };
 
-  const handleOpenAssessment = async (id: string) => {
+  const handleOpenAssessment = async (id: string, status: string) => {
+    if (status !== 'completed') {
+      toast.error("Assessment is still processing or failed.");
+      return;
+    }
+    
     try {
-      setIsOpeningId(id);
+      toast.info("Loading assessment...");
       const response = await getAssessment(id);
       setAssessment(response.data);
       router.push("/output");
     } catch (error) {
       console.error("Failed to load assessment:", error);
       toast.error("Could not load the assessment details.");
-    } finally {
-      setIsOpeningId(null);
+    }
+  };
+
+  const handleDelete = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    setOpenMenuId(null);
+    try {
+      // Optimistic update
+      setAssessments((prev) => prev.filter((a) => a._id !== id));
+      await deleteAssessment(id);
+      toast.success("Assessment deleted");
+    } catch (error) {
+      console.error("Failed to delete:", error);
+      toast.error("Failed to delete assessment");
+      fetchAssessments(); // Revert on failure
     }
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
+    const d = new Date(dateString);
+    const day = d.getDate().toString().padStart(2, '0');
+    const month = (d.getMonth() + 1).toString().padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}-${month}-${year}`;
   };
 
+  const isEmpty = !isLoading && assessments.length === 0;
+
   return (
-    <MainLayout headerTitle="Dashboard" showBackButton={false}>
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-20 pt-8">
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-8 gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Your Assessments</h1>
-            <p className="text-sm text-gray-500 mt-1">Manage and view your generated question papers.</p>
-          </div>
-          <button
-            onClick={() => router.push("/create")}
-            className="bg-[#1c1c1c] text-white font-semibold py-2.5 px-6 rounded-xl hover:bg-black transition-all shadow-md shrink-0"
-          >
-            + New Assessment
-          </button>
-        </div>
-
-        {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 h-48 animate-pulse">
-                <div className="h-6 bg-gray-200 rounded w-3/4 mb-4"></div>
-                <div className="h-4 bg-gray-200 rounded w-1/2 mb-8"></div>
-                <div className="h-10 bg-gray-100 rounded-lg w-full"></div>
-              </div>
-            ))}
-          </div>
-        ) : assessments.length === 0 ? (
+    <MainLayout headerTitle="Assignment" showBackButton={true}>
+      {isEmpty ? (
+        <div className="flex-1 flex flex-col justify-center h-full">
           <EmptyAssignmentsState onAction={() => router.push("/create")} />
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {assessments.map((assessment) => (
-              <div
-                key={assessment._id}
-                className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 hover:shadow-md transition-all flex flex-col group relative overflow-hidden"
-              >
-                {/* Status Indicator */}
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-gray-200 to-gray-300">
-                  {assessment.status === "completed" && <div className="h-full bg-emerald-500 w-full" />}
-                  {assessment.status === "failed" && <div className="h-full bg-red-500 w-full" />}
-                </div>
+        </div>
+      ) : (
+        <div className="flex flex-col min-h-full relative">
+          {/* Page Header */}
+          <header className="mb-6 flex items-start gap-3">
+            <div className="mt-1.5 w-3 h-3 rounded-full bg-green-400 ring-4 ring-green-100 shrink-0"></div>
+            <div>
+              <h1 className="text-2xl font-bold text-[#111827] tracking-tight">Assignments</h1>
+              <p className="text-[#6B7280] mt-1 text-sm">Manage and create assignments for your classes.</p>
+            </div>
+          </header>
 
-                <div className="flex justify-between items-start mb-4 mt-2">
-                  <h3 className="font-bold text-gray-900 text-lg line-clamp-1 flex-1 pr-4" title={assessment.title}>
-                    {assessment.title}
-                  </h3>
-                  {assessment.status === "completed" ? (
-                    <CheckCircle className="w-5 h-5 text-emerald-500 shrink-0" />
-                  ) : assessment.status === "failed" ? (
-                    <XCircle className="w-5 h-5 text-red-500 shrink-0" />
-                  ) : (
-                    <Clock className="w-5 h-5 text-amber-500 shrink-0" />
-                  )}
-                </div>
-
-                <div className="space-y-3 mb-8 flex-1">
-                  <div className="flex items-center text-sm text-gray-500 gap-2">
-                    <FileText className="w-4 h-4 text-gray-400" />
-                    <span>{assessment.totalQuestions} Questions • {assessment.totalMarks} Marks</span>
-                  </div>
-                  <div className="flex items-center text-sm text-gray-500 gap-2">
-                    <Clock className="w-4 h-4 text-gray-400" />
-                    <span>Created on {formatDate(assessment.createdAt)}</span>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => handleOpenAssessment(assessment._id)}
-                  disabled={isOpeningId === assessment._id || assessment.status !== "completed"}
-                  className="w-full flex items-center justify-center gap-2 py-3 bg-gray-50 hover:bg-gray-100 text-gray-900 rounded-xl font-semibold text-sm transition-colors border border-gray-200 disabled:opacity-50 group-hover:border-gray-300 cursor-pointer"
-                >
-                  {isOpeningId === assessment._id ? (
-                    <Loader2 className="w-4 h-4 animate-spin text-gray-500" />
-                  ) : (
-                    <>
-                      {assessment.status === "completed" ? "View Assessment" : assessment.status === "failed" ? "Generation Failed" : "Processing..."}
-                      {assessment.status === "completed" && <ArrowRight className="w-4 h-4" />}
-                    </>
-                  )}
-                </button>
+          {/* Action Bar */}
+          <div className="bg-white rounded-2xl p-3 flex flex-col md:flex-row items-center justify-between mb-6 shadow-sm gap-4">
+            <button className="flex items-center gap-2 text-[#6B7280] font-medium px-4 py-2 hover:bg-gray-50 rounded-lg transition-colors w-full md:w-auto justify-center md:justify-start text-sm">
+              <Filter className="w-4 h-4" />
+              Filter By
+            </button>
+            <div className="relative w-full md:w-96">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <Search className="w-4 h-4 text-gray-400" />
               </div>
-            ))}
+              <input
+                className="block w-full pl-10 pr-3 py-2.5 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-300 focus:border-gray-300 text-sm transition-colors text-[#374151]"
+                placeholder="Search Assignment"
+                type="text"
+              />
+            </div>
           </div>
-        )}
-      </div>
+
+          {/* Assignment Cards Grid */}
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6 pb-24">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="bg-white rounded-3xl p-6 shadow-sm border border-gray-50 h-[180px] animate-pulse flex flex-col justify-between">
+                  <div className="h-6 bg-gray-200 rounded w-3/4"></div>
+                  <div className="flex justify-between items-end">
+                    <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+                    <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6 pb-24">
+              {assessments.map((assessment) => (
+                <article
+                  key={assessment._id}
+                  onClick={() => handleOpenAssessment(assessment._id, assessment.status)}
+                  className="bg-white rounded-3xl p-6 relative shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05),0_2px_4px_-1px_rgba(0,0,0,0.03)] border border-gray-50 flex flex-col h-[180px] justify-between cursor-pointer hover:shadow-md transition-shadow group"
+                >
+                  {/* Card Top: Title + Menu */}
+                  <div className="flex justify-between items-start">
+                    <h2 className="text-xl font-bold text-[#111827] tracking-tight pr-4 line-clamp-1 relative">
+                      {assessment.title}
+                      <span className="absolute bottom-0.5 left-0 w-full h-[1.5px] bg-gray-200"></span>
+                    </h2>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setOpenMenuId(openMenuId === assessment._id ? null : assessment._id);
+                      }}
+                      className="text-gray-400 hover:text-[#111827] p-1 relative z-10 shrink-0"
+                    >
+                      <MoreVertical className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  {/* Dropdown Menu */}
+                  {openMenuId === assessment._id && (
+                    <div className="absolute top-12 right-6 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-20">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleOpenAssessment(assessment._id, assessment.status); }}
+                        className="block w-full text-left px-4 py-2 text-sm text-[#374151] hover:bg-gray-50 font-medium"
+                      >
+                        View Assignment
+                      </button>
+                      <button
+                        onClick={(e) => handleDelete(e, assessment._id)}
+                        className="block w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50 font-medium mx-auto"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Card Bottom: Dates */}
+                  <div className="flex justify-between items-center text-sm mt-auto font-medium">
+                    <span className="text-[#6B7280]">
+                      <span className="text-[#111827] font-bold">Assigned on :</span> {formatDate(assessment.createdAt)}
+                    </span>
+                    <span className="text-[#6B7280]">
+                      <span className="text-[#111827] font-bold">Due :</span>{" "}
+                      {assessment.dueDate ? formatDate(assessment.dueDate) : formatDate(assessment.createdAt)}
+                    </span>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+
+          {/* Floating Create Assignment Button */}
+          <div className="sticky bottom-8 flex justify-center z-20 pointer-events-none mt-auto">
+            <button
+              onClick={() => router.push('/create')}
+              className="pointer-events-auto bg-[#1a1c23] hover:bg-black text-white font-medium py-3 px-6 rounded-full flex items-center gap-2 shadow-lg transition-transform transform hover:scale-105 active:scale-95"
+            >
+              <Plus className="w-4 h-4" strokeWidth={2.5} />
+              Create Assignment
+            </button>
+          </div>
+        </div>
+      )}
     </MainLayout>
   );
 }

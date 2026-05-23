@@ -21,6 +21,12 @@ export const generateAssessment = async (assignmentId: string) => {
   return res.json();
 };
 
+export const getJobStatus = async (jobId: string) => {
+  const res = await fetch(`${API_URL}/jobs/${jobId}`);
+  if (!res.ok) throw new Error('Failed to fetch job status');
+  return res.json();
+};
+
 export const getAssessment = async (assessmentId: string) => {
   const res = await fetch(`${API_URL}/assessments/${assessmentId}`);
   if (!res.ok) throw new Error('Failed to fetch assessment');
@@ -30,5 +36,13 @@ export const getAssessment = async (assessmentId: string) => {
 export const getAllAssessments = async () => {
   const res = await fetch(`${API_URL}/assessments`);
   if (!res.ok) throw new Error('Failed to fetch assessments');
+  return res.json();
+};
+
+export const deleteAssessment = async (assessmentId: string) => {
+  const res = await fetch(`${API_URL}/assessments/${assessmentId}`, {
+    method: 'DELETE',
+  });
+  if (!res.ok) throw new Error('Failed to delete assessment');
   return res.json();
 };

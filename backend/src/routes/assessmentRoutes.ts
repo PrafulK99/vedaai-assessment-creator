@@ -6,6 +6,7 @@ import {
   getJobStatus,
   getAssessment,
   getAllAssessments,
+  deleteAssessment,
 } from "../controllers/assessmentController.js";
 
 const router = Router();
@@ -19,5 +20,6 @@ router.post("/assignments/:id/generate", generateAssessment);
 router.get("/jobs/:jobId", getJobStatus);
 router.get("/assessments", getAllAssessments);
 router.get("/assessments/:assessmentId", getAssessment);
+router.delete("/assessments/:assessmentId", deleteAssessment);
 
 export default router;
