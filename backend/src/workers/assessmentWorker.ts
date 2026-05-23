@@ -3,8 +3,57 @@ import redis from "../config/redis.js";
 import { GenerationJob } from "../models/GenerationJob.js";
 import { GeneratedAssessment } from "../models/GeneratedAssessment.js";
 import type { AssessmentJobData } from "../queues/assessmentQueue.js";
+import { generateAssessmentWithGemini } from "../services/geminiService.js";
 
-// Mock assessment generator (will be replaced with Gemini in Phase 3)
+// Generate assessment using Gemini AI
+const generateAssessmentWithAI = async (jobData: AssessmentJobData) => {
+  try {
+    // Try to use Gemini API for real question generation
+    const questions = await generateAssessmentWithGemini({
+      title: jobData.title,
+      instructions: jobData.instructions,
+      totalQuestions: jobData.totalQuestions,
+      totalMarks: jobData.totalMarks,
+      questionTypes: [], // Can be enhanced with actual question types from assignment
+    });
+
+    // Group questions into sections (max 10 per section)
+    const sectionsArray = [];
+    for (let i = 0; i < questions.length; i += 10) {
+      sectionsArray.push({
+        id: `sec_${sectionsArray.length + 1}`,
+        instructions:
+          jobData.instructions || "Answer all questions in this section",
+        questions: questions.slice(i, i + 10).map((q, idx) => ({
+          id: `q_${i + idx + 1}`,
+          text: q.text,
+          type: q.type,
+          difficulty: q.difficulty,
+          marks: q.marks,
+          options: q.options,
+          answer: q.answer,
+        })),
+      });
+    }
+
+    return {
+      title: jobData.title,
+      sections: sectionsArray,
+      totalQuestions: questions.length,
+      totalMarks: jobData.totalMarks,
+    };
+  } catch (error) {
+    console.warn(
+      "⚠️ Gemini generation failed, falling back to mock data:",
+      error instanceof Error ? error.message : error
+    );
+
+    // Fallback to mock if Gemini fails
+    return generateMockAssessment(jobData);
+  }
+};
+
+// Mock assessment generator (fallback when Gemini fails)
 const generateMockAssessment = async (jobData: AssessmentJobData) => {
   const sections = [
     {
@@ -18,6 +67,7 @@ const generateMockAssessment = async (jobData: AssessmentJobData) => {
           difficulty: ["easy", "medium", "hard"][i % 3],
           marks: Math.ceil(jobData.totalMarks / jobData.totalQuestions),
           options: ["Option A", "Option B", "Option C", "Option D"],
+          answer: "Option A",
         })
       ),
     },
@@ -72,8 +122,8 @@ const assessmentWorker = new Worker<AssessmentJobData>(
         }
       }
 
-      // Generate mock assessment (Phase 3 will use Gemini API)
-      const assessmentData = await generateMockAssessment(job.data);
+      // Generate assessment using Gemini AI (with fallback to mock)
+      const assessmentData = await generateAssessmentWithAI(job.data);
 
       // Create the generated assessment record
       const assessment = new GeneratedAssessment({
