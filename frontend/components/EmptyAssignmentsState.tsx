@@ -1,76 +1,96 @@
 import React from "react";
-import { Search } from "lucide-react";
+import { Plus } from "lucide-react";
 
 export function EmptyAssignmentsState({ onAction }: { onAction?: () => void }) {
   return (
-    <div className="flex-1 flex flex-col items-center justify-center px-6">
+    <div className="flex-1 flex flex-col items-center justify-center px-6 pt-10 pb-20">
       {/* Illustration */}
-      <div className="mb-8 w-64 h-64 flex items-center justify-center">
+      <div className="mb-6 w-64 h-64 flex items-center justify-center relative">
         <svg
-          viewBox="0 0 300 300"
+          viewBox="0 0 200 200"
           className="w-full h-full"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
-          {/* Background circles - decorative */}
-          <circle cx="150" cy="150" r="120" fill="none" stroke="#ECFDF5" strokeWidth="2" />
-          <circle cx="150" cy="150" r="100" fill="none" stroke="#E0E7FF" strokeWidth="1.5" strokeDasharray="4,4" />
+          {/* Large soft background circle */}
+          <circle cx="100" cy="100" r="75" fill="#f1f5f9" />
 
-          {/* Document - left side */}
-          <g transform="translate(40, 60)">
-            <rect x="0" y="0" width="70" height="100" rx="4" fill="white" stroke="#E5E7EB" strokeWidth="2" />
-            <line x1="12" y1="18" x2="58" y2="18" stroke="#D1D5DB" strokeWidth="2" strokeLinecap="round" />
-            <line x1="12" y1="38" x2="58" y2="38" stroke="#D1D5DB" strokeWidth="2" strokeLinecap="round" />
-            <line x1="12" y1="58" x2="48" y2="58" stroke="#D1D5DB" strokeWidth="2" strokeLinecap="round" />
-            <line x1="12" y1="78" x2="48" y2="78" stroke="#D1D5DB" strokeWidth="1.5" strokeLinecap="round" />
-          </g>
+          {/* Squiggly line - top left */}
+          <path
+            d="M 45 90 C 55 90, 65 75, 55 65 C 45 55, 30 75, 45 85"
+            stroke="#111827"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            fill="none"
+          />
 
-          {/* Chat bubble - top right */}
-          <g transform="translate(180, 40)">
-            <rect x="0" y="0" width="60" height="40" rx="6" fill="white" stroke="#E5E7EB" strokeWidth="1.5" />
-            <path d="M 15 40 L 22 50 L 25 40" fill="white" stroke="#E5E7EB" strokeWidth="1.5" />
-            <line x1="8" y1="12" x2="28" y2="12" stroke="#D1D5DB" strokeWidth="1.5" strokeLinecap="round" />
-            <line x1="8" y1="25" x2="52" y2="25" stroke="#D1D5DB" strokeWidth="1.5" strokeLinecap="round" />
-          </g>
-
-          {/* Magnifying glass - center */}
-          <g transform="translate(110, 120)">
-            <circle cx="30" cy="30" r="35" fill="none" stroke="#D8B4FE" strokeWidth="3" />
-            <line x1="60" y1="60" x2="85" y2="85" stroke="#D8B4FE" strokeWidth="3" strokeLinecap="round" />
-          </g>
-
-          {/* X mark inside magnifying glass */}
-          <g transform="translate(130, 140)">
-            <line x1="0" y1="0" x2="24" y2="24" stroke="#EF4444" strokeWidth="4" strokeLinecap="round" />
-            <line x1="24" y1="0" x2="0" y2="24" stroke="#EF4444" strokeWidth="4" strokeLinecap="round" />
-          </g>
-
-          {/* Decorative elements */}
-          <circle cx="220" cy="90" r="4" fill="#60A5FA" />
-          <circle cx="80" cy="200" r="3" fill="#34D399" />
+          {/* Document center */}
+          <rect x="75" y="55" width="50" height="70" rx="8" fill="white" />
           
-          {/* Curved line - decorative */}
-          <path d="M 60 80 Q 70 60 90 75" fill="none" stroke="#F3E8FF" strokeWidth="2" strokeLinecap="round" />
+          {/* Document lines */}
+          {/* Header line - black */}
+          <rect x="85" y="68" width="22" height="4" rx="2" fill="#111827" />
           
-          {/* Small dots */}
-          <circle cx="150" cy="90" r="2" fill="#FCA5A5" />
-          <circle cx="200" cy="200" r="2" fill="#BFDBFE" />
+          {/* Other lines - light gray */}
+          <rect x="85" y="80" width="30" height="4" rx="2" fill="#e2e8f0" />
+          <rect x="85" y="92" width="30" height="4" rx="2" fill="#e2e8f0" />
+          <rect x="85" y="104" width="20" height="4" rx="2" fill="#e2e8f0" />
+          <rect x="85" y="116" width="24" height="4" rx="2" fill="#e2e8f0" />
+
+          {/* Small floating rect top right */}
+          <rect x="135" y="45" width="25" height="15" rx="4" fill="white" />
+          <circle cx="143" cy="52.5" r="2.5" fill="#cbd5e1" />
+          <rect x="149" y="50.5" width="7" height="4" rx="2" fill="#cbd5e1" />
+
+          {/* Magnifying glass */}
+          <g transform="translate(90, 75)">
+            {/* Handle */}
+            <rect
+              x="38"
+              y="38"
+              width="12"
+              height="28"
+              rx="4"
+              fill="#e2dcf4"
+              transform="rotate(-45 44 52)"
+            />
+            {/* Glass frame */}
+            <circle cx="28" cy="28" r="22" fill="white" stroke="#e2dcf4" strokeWidth="6" />
+            
+            {/* Red X inside glass */}
+            <path
+              d="M 18 18 L 38 38 M 38 18 L 18 38"
+              stroke="#ef4444"
+              strokeWidth="6"
+              strokeLinecap="round"
+            />
+          </g>
+
+          {/* 4-point star bottom left */}
+          <path
+            d="M 60 115 Q 65 115 65 110 Q 65 115 70 115 Q 65 115 65 120 Q 65 115 60 115"
+            fill="#64748b"
+          />
+
+          {/* Small circle bottom right */}
+          <circle cx="140" cy="100" r="3" fill="#64748b" />
         </svg>
       </div>
 
       {/* Heading */}
-      <h1 className="text-4xl font-bold text-gray-900 mb-4 text-center">No assignments yet</h1>
+      <h2 className="text-xl font-bold text-text-main mb-3 text-center">No assignments yet</h2>
 
       {/* Description */}
-      <p className="text-gray-500 text-center max-w-xl mb-10 leading-relaxed text-base">
+      <p className="text-text-muted text-center max-w-[420px] mb-8 leading-relaxed text-[15px]">
         Create your first assignment to start collecting and grading student submissions. You can set up rubrics, define marking criteria, and let AI assist with grading.
       </p>
 
       {/* CTA Button */}
-      <button onClick={onAction} className="bg-gray-900 hover:bg-gray-800 text-white font-semibold py-3 px-8 rounded-full flex items-center gap-2 transition-all shadow-lg hover:shadow-xl active:scale-95">
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-        </svg>
+      <button 
+        onClick={onAction} 
+        className="bg-[#1a1c23] hover:bg-black text-white font-medium py-3.5 px-7 rounded-full flex items-center justify-center gap-2 transition-transform transform hover:scale-105 active:scale-95 shadow-md"
+      >
+        <Plus className="w-4 h-4" strokeWidth={2.5} />
         Create Your First Assignment
       </button>
     </div>

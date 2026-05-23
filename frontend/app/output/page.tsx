@@ -132,36 +132,43 @@ export default function AssessmentOutput() {
         <div 
           id="pdf-container"
           ref={pdfRef}
-          className="bg-white rounded-none sm:rounded-[2rem] shadow-sm sm:shadow-lg w-full min-h-264 print:shadow-none print:m-0 print:p-0 print:w-full"
+          className="bg-white rounded-none sm:rounded-[2rem] shadow-sm sm:shadow-lg w-full min-h-264 print:shadow-none print:m-0 print:p-0 print:w-full font-sans text-black"
         >
-          
-          <div className="p-8 sm:p-14 print:p-0">
+          <div className="p-10 sm:p-14 print:p-8">
             {/* Exam Header */}
-            <div className="text-center mb-8 border-b-2 border-gray-900 pb-8 print:pb-6 print:mb-6">
-              <h1 className="text-3xl font-bold text-gray-900 mb-6 uppercase tracking-wider">{generatedAssessment.title}</h1>
+            <div className="text-center mb-8">
+              <h1 className="text-2xl font-bold mb-2">
+                {generatedAssessment.schoolName || "Delhi Public School, Sector-4, Bokaro"}
+              </h1>
+              <h2 className="text-lg font-bold mb-1">
+                Subject: {generatedAssessment.subject || "English"}
+              </h2>
+              <h3 className="text-lg font-bold mb-8">
+                Class: {generatedAssessment.classLevel || "5th"}
+              </h3>
               
+              <div className="flex justify-between items-center mb-6 font-bold text-[15px]">
+                <div>Time Allowed: {generatedAssessment.timeAllowed || "45 minutes"}</div>
+                <div>Maximum Marks: {generatedAssessment.totalMarks || "20"}</div>
+              </div>
+
+              <div className="text-left font-bold text-[15px] mb-6">
+                All questions are compulsory unless stated otherwise.
+              </div>
+
               {/* Student Info Area */}
-              <div className="flex justify-between items-end mt-12 text-left">
-                <div className="space-y-4 flex-1 max-w-[60%]">
-                  <div className="flex items-end gap-3">
-                    <span className="text-sm font-semibold text-gray-900 whitespace-nowrap">Student Name:</span>
-                    <div className="flex-1 border-b border-gray-400"></div>
-                  </div>
-                  <div className="flex items-end gap-3">
-                    <span className="text-sm font-semibold text-gray-900 whitespace-nowrap">Class / Section:</span>
-                    <div className="flex-1 border-b border-gray-400"></div>
-                  </div>
+              <div className="text-left space-y-3 font-bold text-[15px] mb-12">
+                <div className="flex items-end gap-2">
+                  <span>Name: </span>
+                  <div className="w-64 border-b border-black"></div>
                 </div>
-                
-                <div className="space-y-4 flex-1 max-w-[30%]">
-                   <div className="flex items-end gap-3">
-                    <span className="text-sm font-semibold text-gray-900 whitespace-nowrap">Date:</span>
-                    <div className="flex-1 border-b border-gray-400"></div>
-                  </div>
-                  <div className="flex items-end gap-3">
-                    <span className="text-sm font-semibold text-gray-900 whitespace-nowrap">Roll No:</span>
-                    <div className="flex-1 border-b border-gray-400"></div>
-                  </div>
+                <div className="flex items-end gap-2">
+                  <span>Roll Number: </span>
+                  <div className="w-48 border-b border-black"></div>
+                </div>
+                <div className="flex items-end gap-2">
+                  <span>Class: {generatedAssessment.classLevel || "5th"} Section: </span>
+                  <div className="w-32 border-b border-black"></div>
                 </div>
               </div>
             </div>
@@ -170,55 +177,36 @@ export default function AssessmentOutput() {
             <div className="space-y-10">
               {generatedAssessment.sections.map((section, sIndex) => (
                 <div key={section.id} className="section-container">
-                  <div className="mb-6 bg-gray-50 p-4 border-l-4 border-gray-900 print:bg-transparent print:border-gray-500 print:pl-3 print:py-2">
-                    <h3 className="font-bold text-gray-900 text-lg">Section {String.fromCharCode(65 + sIndex)}</h3>
+                  <div className="text-center mb-6">
+                    <h3 className="font-bold text-lg mb-4">Section {String.fromCharCode(65 + sIndex)}</h3>
                     {section.instructions && (
-                      <p className="text-sm text-gray-600 font-medium italic mt-1">{section.instructions}</p>
+                      <div className="text-left font-bold text-[15px]">
+                        <div>{section.questions[0]?.type || "Questions"}</div>
+                        <div className="italic font-normal text-sm">{section.instructions}</div>
+                      </div>
                     )}
                   </div>
 
-                  <div className="space-y-8 pl-1 sm:pl-4">
+                  <div className="space-y-4 text-[15px]">
                     {section.questions.map((q, qIndex) => (
-                      <div key={q.id} className="relative group">
-                        <div className="flex items-start gap-4">
-                          <span className="font-bold text-gray-900 min-w-6">Q{qIndex + 1}.</span>
-                          <div className="flex-1">
-                            <p className="text-gray-900 font-medium leading-relaxed">{q.text}</p>
-                            
-                            {/* MCQ Options if any */}
-                            {q.options && q.options.length > 0 && (
-                              <div className="mt-4 grid gap-3 pl-2 sm:grid-cols-2">
-                                {q.options.map((opt, oIdx) => (
-                                  <div key={oIdx} className="flex gap-3 items-start">
-                                    <span className="font-medium text-gray-600">({String.fromCharCode(97 + oIdx)})</span>
-                                    <span className="text-gray-800">{opt}</span>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-
-                            {/* Blank space for generic short/long answers */}
-                            {(!q.options || q.options.length === 0) && (
-                              <div className="mt-4 space-y-6">
-                                <div className="border-b border-gray-200 border-dashed w-full h-8"></div>
-                                <div className="border-b border-gray-200 border-dashed w-full h-8"></div>
-                                {q.type === "Long Questions" && (
-                                  <>
-                                    <div className="border-b border-gray-200 border-dashed w-full h-8"></div>
-                                    <div className="border-b border-gray-200 border-dashed w-full h-8"></div>
-                                  </>
-                                )}
-                              </div>
-                            )}
-                          </div>
+                      <div key={q.id} className="flex items-start gap-2">
+                        <span className="font-medium">{qIndex + 1}.</span>
+                        <div className="flex-1">
+                          <p className="font-medium">
+                            [{getDifficultyLabel(q.difficulty)}] {q.text} <span className="font-medium">[{q.marks} {q.marks === 1 ? 'Mark' : 'Marks'}]</span>
+                          </p>
                           
-                          {/* Marks & Meta - Right aligned */}
-                          <div className="flex flex-col items-end gap-2 shrink-0 ml-4 print:text-gray-600">
-                            <span className="text-sm font-bold text-gray-900">[{q.marks} {q.marks === 1 ? 'Mark' : 'Marks'}]</span>
-                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border print:border-gray-300 print:text-gray-500 ${difficultyColors[q.difficulty]}`}>
-                              {getDifficultyLabel(q.difficulty)}
-                            </span>
-                          </div>
+                          {/* MCQ Options if any */}
+                          {q.options && q.options.length > 0 && (
+                            <div className="mt-2 grid gap-2 pl-2 sm:grid-cols-2">
+                              {q.options.map((opt, oIdx) => (
+                                <div key={oIdx} className="flex gap-2 items-start">
+                                  <span>({String.fromCharCode(97 + oIdx)})</span>
+                                  <span>{opt}</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       </div>
                     ))}
@@ -228,8 +216,21 @@ export default function AssessmentOutput() {
             </div>
             
             {/* End of paper mark */}
-            <div className="mt-16 text-center text-gray-400 font-medium tracking-widest text-sm uppercase">
-               --- End of Assignment ---
+            <div className="mt-8 font-bold text-[15px]">
+               End of Question Paper
+            </div>
+
+            {/* Answer Key Section */}
+            <div className="mt-16 pt-8 break-before-page">
+              <h3 className="font-bold text-lg mb-6">Answer Key:</h3>
+              <div className="space-y-4 text-[15px]">
+                {generatedAssessment.sections.flatMap(s => s.questions).map((q, idx) => (
+                   <div key={`ans_${q.id}`} className="flex items-start gap-2">
+                      <span className="font-medium shrink-0">{idx + 1}.</span>
+                      <p>{q.answer || "Answer not provided."}</p>
+                   </div>
+                ))}
+              </div>
             </div>
 
           </div>

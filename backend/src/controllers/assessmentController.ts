@@ -26,11 +26,12 @@ const getOrCreateUser = async (userId?: string) => {
 // Create a new assignment
 export const createAssignment = asyncHandler(
   async (req: Request, res: Response, _next: NextFunction) => {
-    const { title, dueDate, instructions, questions, fileName } = req.body;
+    const { title, schoolName, subject, classLevel, timeAllowed, dueDate, instructions, questions, fileName } = req.body;
+
+    const generatedTitle = title?.trim() || (subject ? `${subject} - Class ${classLevel}` : "Untitled Assignment");
 
     // Validation
     const errors: Record<string, string> = {};
-    if (!title?.trim()) errors.title = "Title is required";
     if (!dueDate) errors.dueDate = "Due date is required";
     if (!questions || questions.length === 0)
       errors.questions = "At least one question type is required";
@@ -52,7 +53,11 @@ export const createAssignment = asyncHandler(
 
     const assignment = new Assignment({
       userId: user._id,
-      title,
+      title: generatedTitle,
+      schoolName: schoolName || "",
+      subject: subject || "",
+      classLevel: classLevel || "",
+      timeAllowed: timeAllowed || "",
       dueDate: new Date(dueDate),
       instructions: instructions || "",
       questions,
@@ -128,6 +133,10 @@ export const generateAssessment = asyncHandler(
         userId: assignment.userId.toString(),
         jobId,
         title: assignment.title,
+        schoolName: assignment.schoolName,
+        subject: assignment.subject,
+        classLevel: assignment.classLevel,
+        timeAllowed: assignment.timeAllowed,
         instructions: assignment.instructions,
         totalQuestions: assignment.totalQuestions,
         totalMarks: assignment.totalMarks,
@@ -208,6 +217,25 @@ export const getAllAssessments = asyncHandler(
     res.status(200).json({
       success: true,
       data: assessments,
+    });
+  }
+);
+
+// Delete generated assessment
+export const deleteAssessment = asyncHandler(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const { assessmentId } = req.params;
+
+    const assessment = await GeneratedAssessment.findByIdAndDelete(assessmentId);
+    if (!assessment) {
+      const error: any = new Error("Assessment not found");
+      error.status = 404;
+      throw error;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Assessment deleted successfully",
     });
   }
 );

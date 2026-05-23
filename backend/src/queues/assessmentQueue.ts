@@ -6,6 +6,10 @@ export interface AssessmentJobData {
   userId: string;
   jobId: string;
   title: string;
+  schoolName: string;
+  subject: string;
+  classLevel: string;
+  timeAllowed: string;
   instructions: string;
   totalQuestions: number;
   totalMarks: number;

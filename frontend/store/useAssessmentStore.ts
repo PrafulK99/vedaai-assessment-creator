@@ -1,20 +1,31 @@
 import { create } from 'zustand';
 
-export interface AssessmentContext {
-  title: string;
-  sections: Array<{
+export interface Section {
+  id: string;
+  instructions: string;
+  questions: Array<{
     id: string;
-    instructions: string;
-    questions: Array<{
-      id: string;
-      text: string;
-      type: string;
-      difficulty: 'easy' | 'medium' | 'hard';
-      marks: number;
-      options?: string[];
-      answer?: string;
-    }>;
+    text: string;
+    type: string;
+    difficulty: 'easy' | 'medium' | 'hard';
+    marks: number;
+    options?: string[];
+    answer?: string;
   }>;
+}
+
+export interface AssessmentContext {
+  _id: string;
+  title: string;
+  schoolName: string;
+  subject: string;
+  classLevel: string;
+  timeAllowed: string;
+  sections: Section[];
+  totalQuestions: number;
+  totalMarks: number;
+  status: string;
+  createdAt: string;
 }
 
 export interface AssessmentState {

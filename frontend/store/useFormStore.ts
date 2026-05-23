@@ -8,6 +8,10 @@ export interface QuestionType {
 
 export interface FormState {
   title: string;
+  schoolName: string;
+  subject: string;
+  classLevel: string;
+  timeAllowed: string;
   dueDate: string;
   instructions: string;
   questions: QuestionType[];
@@ -21,9 +25,13 @@ export interface FormState {
 
 const defaultState = {
   title: '',
+  schoolName: '',
+  subject: '',
+  classLevel: '',
+  timeAllowed: '',
   dueDate: '',
   instructions: '',
-  questions: [{ type: 'Multiple Choice', count: 10, marks: 1 }],
+  questions: [{ type: 'Multiple Choice Questions', count: 10, marks: 1 }],
   file: null,
 };
 

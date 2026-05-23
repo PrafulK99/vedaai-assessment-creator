@@ -9,6 +9,10 @@ export interface QuestionType {
 export interface IAssignment extends Document {
   userId: mongoose.Types.ObjectId;
   title: string;
+  schoolName: string;
+  subject: string;
+  classLevel: string;
+  timeAllowed: string;
   dueDate: Date;
   instructions: string;
   questions: QuestionType[];
@@ -28,6 +32,10 @@ const assignmentSchema = new Schema<IAssignment>(
       required: true,
     },
     title: { type: String, required: true, trim: true },
+    schoolName: { type: String, default: "" },
+    subject: { type: String, default: "" },
+    classLevel: { type: String, default: "" },
+    timeAllowed: { type: String, default: "" },
     dueDate: { type: Date, required: true },
     instructions: { type: String, default: "" },
     questions: [

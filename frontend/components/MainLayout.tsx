@@ -16,12 +16,12 @@ export function MainLayout({
   onBackClick,
 }: MainLayoutProps) {
   return (
-    <div className="flex h-screen bg-[#e4e4e4] overflow-hidden">
+    <div className="bg-gray-bg flex h-screen overflow-hidden text-text-main p-4 gap-4">
       {/* Sidebar */}
       <Sidebar />
 
-      {/* Main Content */}
-      <div className="ml-71 flex flex-col flex-1 relative">
+      {/* Main Content Container */}
+      <div className="flex-1 flex flex-col min-w-0 gap-4" data-purpose="main-container">
         {/* Header */}
         <Header
           title={headerTitle}
@@ -30,9 +30,9 @@ export function MainLayout({
         />
 
         {/* Content Area */}
-        <div className="pt-20 flex-1 overflow-auto">
+        <main className="flex-1 bg-sidebar-bg rounded-[32px] p-8 overflow-y-auto shadow-sm relative flex flex-col" data-purpose="main-content">
           {children}
-        </div>
+        </main>
       </div>
     </div>
   );

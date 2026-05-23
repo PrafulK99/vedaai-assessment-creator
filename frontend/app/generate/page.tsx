@@ -8,7 +8,7 @@ import { CheckCircle2, Loader2, AlertCircle } from "lucide-react";
 import { useAssessmentStore } from "@/store/useAssessmentStore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { io, Socket } from "socket.io-client";
-import { getAssessment } from "@/lib/api";
+import { getAssessment, getJobStatus } from "@/lib/api";
 
 export default function GenerationStatus() {
   const router = useRouter();
@@ -24,13 +24,32 @@ export default function GenerationStatus() {
     const API_URL = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5000';
     const socket: Socket = io(API_URL);
 
+    const fetchInitialStatus = async () => {
+      try {
+        const res = await getJobStatus(currentJobId);
+        if (res.data) {
+          if (res.data.status !== 'pending') {
+             setStatus(res.data.status);
+             setProgress(res.data.progress || 0, res.data.message || '');
+          }
+          if (res.data.status === 'failed') {
+             setError(res.data.error || 'Generation failed');
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch initial job status", err);
+      }
+    };
+    
+    fetchInitialStatus();
+
     socket.on('connect', () => {
       console.log('Connected to socket server');
       socket.emit('join-job', currentJobId);
-      setStatus('processing');
     });
 
     socket.on('generation-progress', (data: { progress: number; message: string }) => {
+      setStatus('processing');
       setProgress(data.progress, data.message);
     });
 
@@ -69,7 +88,7 @@ export default function GenerationStatus() {
           
           {/* Status Icon */}
           <div className="mb-6">
-            {status === 'processing' && (
+            {(status === 'processing' || status === 'queued') && (
               <div className="relative">
                  <div className="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center">
                    <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
@@ -92,7 +111,7 @@ export default function GenerationStatus() {
           </div>
 
           <h2 className="text-xl font-bold text-gray-900 tracking-tight mb-2">
-            {status === 'processing' ? 'Generating your assessment' : 
+            {(status === 'processing' || status === 'queued') ? 'Generating your assessment...' : 
              status === 'completed' ? 'Assessment ready!' : 
              'Generation failed'}
           </h2>
@@ -116,7 +135,7 @@ export default function GenerationStatus() {
           </div>
 
           {/* Action Buttons */}
-          {status === 'processing' && (
+          {(status === 'processing' || status === 'queued') && (
              <div className="flex flex-col items-center gap-6 w-full max-w-md">
                 <div className="flex items-center gap-3 text-sm text-gray-400 font-medium">
                   <Loader2 className="w-4 h-4 animate-spin" />
