@@ -140,6 +140,7 @@ export const generateAssessment = asyncHandler(
         instructions: assignment.instructions,
         totalQuestions: assignment.totalQuestions,
         totalMarks: assignment.totalMarks,
+        questionTypes: assignment.questions,
       },
       {
         jobId: jobId,

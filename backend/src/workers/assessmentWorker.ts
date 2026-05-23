@@ -14,18 +14,24 @@ const generateAssessmentWithAI = async (jobData: AssessmentJobData) => {
     instructions: jobData.instructions,
     totalQuestions: jobData.totalQuestions,
     totalMarks: jobData.totalMarks,
-    questionTypes: [], // Can be enhanced with actual question types from assignment
+    questionTypes: jobData.questionTypes,
   });
 
-  // Group questions into sections (max 10 per section)
-  const sectionsArray = [];
-  for (let i = 0; i < questions.length; i += 10) {
-    sectionsArray.push({
-      id: `sec_${sectionsArray.length + 1}`,
-      instructions:
-        jobData.instructions || "Answer all questions in this section",
-      questions: questions.slice(i, i + 10).map((q, idx) => ({
-        id: `q_${i + idx + 1}`,
+  // Group questions by type into sections
+  const questionsByType: Record<string, typeof questions> = {};
+  for (const q of questions) {
+    if (!questionsByType[q.type]) {
+      questionsByType[q.type] = [];
+    }
+    questionsByType[q.type]!.push(q);
+  }
+
+  const sectionsArray = Object.entries(questionsByType).map(([type, typeQs], index) => {
+    return {
+      id: `sec_${index + 1}`,
+      instructions: jobData.instructions || `Answer all questions in this section.`,
+      questions: typeQs.map((q, idx) => ({
+        id: `q_${index}_${idx}`,
         text: q.text,
         type: q.type,
         difficulty: q.difficulty,
@@ -33,8 +39,8 @@ const generateAssessmentWithAI = async (jobData: AssessmentJobData) => {
         options: q.options,
         answer: q.answer,
       })),
-    });
-  }
+    };
+  });
 
   return {
     title: jobData.title,
