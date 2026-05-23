@@ -47,7 +47,7 @@ Return the response as a JSON array with this exact structure:
 [
   {
     "text": "Question text here",
-    "type": "Multiple Choice" or "Short Answer" or "Essay",
+    "type": "<Exact type string from the Question distribution requested>",
     "difficulty": "easy" or "medium" or "hard",
     "marks": number,
     "options": ["A", "B", "C", "D"] (only for multiple choice),
@@ -55,6 +55,7 @@ Return the response as a JSON array with this exact structure:
   }
 ]
 
+IMPORTANT: You MUST generate the EXACT count and types of questions requested in the 'Question distribution'. Do not default to multiple choice unless explicitly requested.
 Only return the JSON array, no other text.`;
 
     console.log("🤖 Calling Gemini API for assessment generation...");

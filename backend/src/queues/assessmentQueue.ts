@@ -13,6 +13,7 @@ export interface AssessmentJobData {
   instructions: string;
   totalQuestions: number;
   totalMarks: number;
+  questionTypes: Array<{ type: string; count: number; marks: number }>;
 }
 
 // Create the assessment generation queue

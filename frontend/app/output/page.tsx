@@ -6,14 +6,17 @@ import { useAssessmentStore } from "@/store/useAssessmentStore";
 import { useRouter } from "next/navigation";
 import { Download, RefreshCw, Share2, Printer, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import { AssessmentPDF } from "@/components/AssessmentPDF";
 
 export default function AssessmentOutput() {
   const router = useRouter();
   const { generatedAssessment } = useAssessmentStore();
   const pdfRef = useRef<HTMLDivElement>(null);
-  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
+    setIsClient(true);
     // If no assessment exists (e.g. user refreshed the page directly on /output), redirect back to /create
     if (!generatedAssessment) {
       router.push("/create");
@@ -26,50 +29,6 @@ export default function AssessmentOutput() {
 
   const handlePrint = () => {
     window.print();
-  };
-
-  const handleDownloadPDF = async () => {
-    if (!pdfRef.current || !generatedAssessment) return;
-    
-    try {
-      setIsGeneratingPDF(true);
-      toast.info("Generating PDF... Please wait.");
-
-      // Dynamically import the modern libraries
-      const { toPng } = await import("html-to-image");
-      const { jsPDF } = await import("jspdf");
-
-      // html-to-image uses the browser's native rendering engine via SVG foreignObject, 
-      // completely bypassing the old html2canvas CSS parsing crashes!
-      const dataUrl = await toPng(pdfRef.current, { 
-        quality: 0.98,
-        backgroundColor: '#ffffff',
-        style: {
-          margin: '0', // Reset any margins that might affect the capture
-        }
-      });
-      
-      const pdf = new jsPDF({
-        orientation: "portrait",
-        unit: "mm",
-        format: "a4"
-      });
-
-      const imgProps = pdf.getImageProperties(dataUrl);
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-      
-      // Add the captured image to the PDF
-      pdf.addImage(dataUrl, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      pdf.save(`${generatedAssessment.title.replace(/\s+/g, '_')}_Assessment.pdf`);
-      
-      toast.success("PDF Downloaded successfully!");
-    } catch (error) {
-      console.error("PDF generation failed:", error);
-      toast.error("Failed to generate PDF. Please try printing instead.");
-    } finally {
-      setIsGeneratingPDF(false);
-    }
   };
 
   const handleShare = () => {
@@ -117,14 +76,27 @@ export default function AssessmentOutput() {
             >
               <Printer className="w-4 h-4" /> Print
             </button>
-            <button 
-              onClick={handleDownloadPDF}
-              disabled={isGeneratingPDF}
-              className="flex items-center gap-2 px-6 py-2.5 bg-[#1c1c1c] text-white rounded-xl text-sm font-semibold hover:bg-black transition-colors shadow-md disabled:opacity-70"
-            >
-              {isGeneratingPDF ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />} 
-              {isGeneratingPDF ? "Generating..." : "Download PDF"}
-            </button>
+            {isClient ? (
+              <PDFDownloadLink
+                document={<AssessmentPDF assessment={generatedAssessment} />}
+                fileName={`${generatedAssessment.schoolName || "Assessment"}.pdf`}
+                className="flex items-center gap-2 px-6 py-2.5 bg-[#1c1c1c] text-white rounded-xl text-sm font-semibold hover:bg-black transition-colors shadow-md disabled:opacity-70"
+              >
+                {({ loading }) => (
+                  <>
+                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                    {loading ? "Preparing PDF..." : "Download PDF"}
+                  </>
+                )}
+              </PDFDownloadLink>
+            ) : (
+              <button 
+                disabled
+                className="flex items-center gap-2 px-6 py-2.5 bg-[#1c1c1c] text-white rounded-xl text-sm font-semibold hover:bg-black transition-colors shadow-md opacity-70"
+              >
+                <Loader2 className="w-4 h-4 animate-spin" /> Preparing PDF...
+              </button>
+            )}
           </div>
         </div>
 
@@ -192,19 +164,39 @@ export default function AssessmentOutput() {
                       <div key={q.id} className="flex items-start gap-2">
                         <span className="font-medium">{qIndex + 1}.</span>
                         <div className="flex-1">
-                          <p className="font-medium">
-                            [{getDifficultyLabel(q.difficulty)}] {q.text} <span className="font-medium">[{q.marks} {q.marks === 1 ? 'Mark' : 'Marks'}]</span>
-                          </p>
+                          <div className="flex justify-between items-start gap-4">
+                            <p className="font-medium text-justify flex-1">
+                              {q.text}
+                            </p>
+                            <div className="flex flex-col items-end gap-1 shrink-0 ml-4">
+                              <span className="font-medium">[{q.marks} {q.marks === 1 ? 'Mark' : 'Marks'}]</span>
+                              <span className="text-sm font-medium text-gray-600">[{getDifficultyLabel(q.difficulty)}]</span>
+                            </div>
+                          </div>
                           
                           {/* MCQ Options if any */}
                           {q.options && q.options.length > 0 && (
-                            <div className="mt-2 grid gap-2 pl-2 sm:grid-cols-2">
+                            <div className="mt-4 grid gap-2 pl-2 sm:grid-cols-2">
                               {q.options.map((opt, oIdx) => (
                                 <div key={oIdx} className="flex gap-2 items-start">
                                   <span>({String.fromCharCode(97 + oIdx)})</span>
                                   <span>{opt}</span>
                                 </div>
                               ))}
+                            </div>
+                          )}
+
+                          {/* Blank space for non-MCQ answers */}
+                          {(!q.options || q.options.length === 0) && (
+                            <div className="mt-8 mb-4 space-y-8 w-full pr-8">
+                              <div className="border-b border-gray-300 border-dashed w-full h-2"></div>
+                              <div className="border-b border-gray-300 border-dashed w-full h-2"></div>
+                              {(q.marks > 2 || q.type?.toLowerCase().includes("long")) && (
+                                <>
+                                  <div className="border-b border-gray-300 border-dashed w-full h-2"></div>
+                                  <div className="border-b border-gray-300 border-dashed w-full h-2"></div>
+                                </>
+                              )}
                             </div>
                           )}
                         </div>
