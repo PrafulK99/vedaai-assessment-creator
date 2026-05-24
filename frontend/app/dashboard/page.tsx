@@ -11,6 +11,7 @@ import { toast } from "sonner";
 
 export default function Home() {
   const [assessments, setAssessments] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const router = useRouter();
@@ -76,6 +77,10 @@ export default function Home() {
     return `${day}-${month}-${year}`;
   };
 
+  const filteredAssessments = assessments.filter(assessment => 
+    assessment.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   const isEmpty = !isLoading && assessments.length === 0;
 
   return (
@@ -109,6 +114,8 @@ export default function Home() {
                 className="block w-full pl-10 pr-4 py-2 border border-gray-200 rounded-full leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-300 focus:border-gray-300 text-sm transition-colors text-[#374151]"
                 placeholder="Search Assignment"
                 type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
           </div>
@@ -130,9 +137,13 @@ export default function Home() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6 pb-24">
-              {assessments.map((assessment) => (
-                <article
-                  key={assessment._id}
+              {filteredAssessments.length === 0 ? (
+                <div className="col-span-1 md:col-span-2 text-center py-12 text-gray-500">
+                  No assignments match your search.
+                </div>
+              ) : filteredAssessments.map((assessment) => (
+                  <article
+                    key={assessment._id}
                   onClick={() => handleOpenAssessment(assessment._id, assessment.status)}
                   className="bg-white rounded-3xl p-6 relative shadow-sm border border-gray-100 flex flex-col h-[180px] justify-between cursor-pointer hover:shadow-md transition-shadow group"
                 >

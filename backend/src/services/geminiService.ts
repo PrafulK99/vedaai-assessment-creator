@@ -71,17 +71,26 @@ Only return the JSON array, no other text.`;
 
     const questions = JSON.parse(jsonMatch[0]) as GeneratedQuestion[];
 
-    // Validate and clean questions
     const validatedQuestions = questions
       .slice(0, params.totalQuestions)
-      .map((q, idx) => ({
-        text: q.text || `Question ${idx + 1}`,
-        type: q.type || "Multiple Choice",
-        difficulty: (q.difficulty || "medium") as "easy" | "medium" | "hard",
-        marks: q.marks || Math.ceil(params.totalMarks / params.totalQuestions),
-        options: q.options || ["Option A", "Option B", "Option C", "Option D"],
-        answer: q.answer || "Answer not provided",
-      }));
+      .map((q, idx) => {
+        const isMCQ = q.type?.toLowerCase().includes("multiple") || q.type?.toLowerCase().includes("mcq");
+        const finalOptions = q.options && q.options.length > 0 ? q.options : (isMCQ ? ["Option A", "Option B", "Option C", "Option D"] : undefined);
+        
+        const question: GeneratedQuestion = {
+          text: q.text || `Question ${idx + 1}`,
+          type: q.type || "Multiple Choice",
+          difficulty: (q.difficulty || "medium") as "easy" | "medium" | "hard",
+          marks: q.marks || Math.ceil(params.totalMarks / params.totalQuestions),
+          answer: q.answer || "Answer not provided",
+        };
+        
+        if (finalOptions) {
+          question.options = finalOptions;
+        }
+        
+        return question;
+      });
 
     console.log(`✅ Generated ${validatedQuestions.length} questions with Gemini`);
     return validatedQuestions;
