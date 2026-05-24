@@ -126,7 +126,7 @@ cp .env.example .env
 Edit `backend/.env` and configure:
 - `PORT` - (default: 5000)
 - `MONGODB_URI` - MongoDB connection string
-- `REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD` - Redis connection details
+- `REDIS_URL` - Complete Redis connection URL (e.g., from Upstash)
 - `GEMINI_API_KEY` - Your Google Gemini Key
 - `CLIENT_URL` - Your frontend URL (e.g. `http://localhost:3000`)
 
