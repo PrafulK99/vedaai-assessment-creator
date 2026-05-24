@@ -1,29 +1,50 @@
-import React from "react";
-import { LayoutGrid, Users, FileText, Smartphone, Clock, Settings, Sparkles } from "lucide-react";
+import React, { useEffect } from "react";
+import { LayoutGrid, Users, FileText, Smartphone, Clock, Settings, Sparkles, X } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
-export function Sidebar() {
+interface SidebarProps {
+  isOpen?: boolean;
+  onClose?: () => void;
+}
+
+export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
+  const pathname = usePathname();
+
+  // Close sidebar on route change on mobile
+  useEffect(() => {
+    if (onClose) onClose();
+  }, [pathname]);
+
   return (
     <aside
-      className="w-[280px] bg-sidebar-bg rounded-[32px] p-2 shrink-0 flex"
+      className={`fixed inset-y-0 left-0 z-50 transform ${isOpen ? "translate-x-0" : "-translate-x-full"} lg:relative lg:translate-x-0 transition-transform duration-300 ease-in-out w-[280px] bg-sidebar-bg rounded-none lg:rounded-[32px] p-2 shrink-0 flex flex-col h-full`}
       data-purpose="sidebar-outer"
     >
+      {/* Close button for mobile */}
+      <button 
+        onClick={onClose}
+        className="absolute top-4 right-4 p-2 text-gray-500 hover:text-gray-900 lg:hidden z-10 bg-white rounded-full shadow-md"
+      >
+        <X className="w-5 h-5" />
+      </button>
+
       {/* Inner white panel */}
       <div
-        className="bg-white rounded-3xl w-full flex flex-col shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06),4px_0_15px_rgba(0,0,0,0.05)] overflow-hidden"
+        className="bg-white rounded-3xl w-full flex-1 flex flex-col shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06),4px_0_15px_rgba(0,0,0,0.05)] overflow-hidden"
         data-purpose="sidebar-inner"
       >
         {/* Top Section: Logo + CTA */}
         <div className="px-6 pt-6 pb-2 flex flex-col gap-6">
           {/* Logo */}
-          <div className="flex items-center justify-center gap-3 cursor-pointer">
+          <Link href="/" className="flex items-center justify-center gap-3 cursor-pointer hover:opacity-90 transition-opacity">
             <img 
               src="https://res.cloudinary.com/dgqapabyw/image/upload/v1779559976/ChatGPT_Image_May_23_2026_11_41_50_PM_knbyae.png" 
               alt="VedaAI Logo" 
               className="w-10 h-10 rounded-xl object-contain shadow-sm"
             />
             <span className="text-[22px] font-bold text-[#111827] tracking-tight">VedaAI</span>
-          </div>
+          </Link>
 
           {/* Create Assignment Button */}
           <Link
@@ -38,7 +59,7 @@ export function Sidebar() {
         {/* Navigation Links */}
         <nav className="flex-1 px-4 py-4 flex flex-col gap-1 overflow-y-auto">
           <Link
-            href="/"
+            href="/dashboard"
             className="flex items-center gap-3 px-4 py-3 rounded-xl text-[#6B7280] hover:bg-[#F3F4F6] hover:text-[#111827] transition-colors duration-150 font-medium text-[15px]"
           >
             <LayoutGrid className="w-5 h-5" />
@@ -52,7 +73,7 @@ export function Sidebar() {
             My Groups
           </Link>
           <Link
-            href="/"
+            href="/dashboard"
             className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#F3F4F6] text-[#111827] transition-colors duration-150"
           >
             <FileText className="w-5 h-5" />

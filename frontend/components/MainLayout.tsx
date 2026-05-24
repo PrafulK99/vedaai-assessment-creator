@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
 
@@ -15,18 +15,30 @@ export function MainLayout({
   showBackButton = true,
   onBackClick,
 }: MainLayoutProps) {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   return (
-    <div className="bg-gray-bg flex h-screen overflow-hidden text-text-main p-4 gap-4">
+    <div className="bg-gray-bg flex h-screen overflow-hidden text-text-main p-2 sm:p-4 gap-2 sm:gap-4 relative">
+      
+      {/* Mobile Overlay */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden transition-opacity"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <Sidebar />
+      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
       {/* Main Content Container */}
-      <div className="flex-1 flex flex-col min-w-0 gap-4" data-purpose="main-container">
+      <div className="flex-1 flex flex-col min-w-0 gap-2 sm:gap-4 h-full" data-purpose="main-container">
         {/* Header */}
         <Header
           title={headerTitle}
           showBackButton={showBackButton}
           onBackClick={onBackClick}
+          onMenuClick={() => setIsSidebarOpen(true)}
         />
 
         {/* Content Area */}

@@ -104,6 +104,7 @@ const assessmentWorker = new Worker<AssessmentJobData>(
         subject: job.data.subject,
         classLevel: job.data.classLevel,
         timeAllowed: job.data.timeAllowed,
+        dueDate: job.data.dueDate,
         ...assessmentData,
         status: "completed",
       });

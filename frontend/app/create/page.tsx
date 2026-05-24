@@ -110,7 +110,7 @@ export default function CreateAssignment() {
 
   return (
     <MainLayout headerTitle="Assignment" showBackButton={true}>
-      <div className="flex-1 overflow-y-auto px-2 md:px-10 pb-24">
+      <div className="flex-1 overflow-y-auto px-0 md:px-10 pb-24">
         {/* Page Header */}
         <div className="max-w-[800px] mx-auto mb-8">
           <div className="flex items-center gap-3 mb-2">
