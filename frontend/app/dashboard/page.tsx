@@ -8,6 +8,22 @@ import { useAssessmentStore } from "@/store/useAssessmentStore";
 import { useRouter } from "next/navigation";
 import { Loader2, ArrowRight, Trash2, Filter, Search, MoreVertical, Plus } from "lucide-react";
 import { toast } from "sonner";
+import { motion, AnimatePresence, Variants } from "framer-motion";
+
+const containerVariants: Variants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.05
+    }
+  }
+};
+
+const itemVariants: Variants = {
+  hidden: { opacity: 0, y: 15 },
+  show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
+};
 
 export default function Home() {
   const [assessments, setAssessments] = useState<any[]>([]);
@@ -102,16 +118,20 @@ export default function Home() {
 
           {/* Action Bar */}
           <div className="bg-white rounded-full p-2 flex items-center justify-between mb-6 shadow-sm gap-4">
-            <button className="flex items-center gap-2 text-[#6B7280] font-medium px-4 py-2 hover:bg-gray-50 rounded-full transition-colors shrink-0 text-sm">
+            <motion.button 
+              whileHover={{ backgroundColor: "var(--color-gray-50)" }}
+              whileTap={{ scale: 0.98 }}
+              className="flex items-center gap-2 text-[#6B7280] font-medium px-4 py-2 rounded-full transition-colors shrink-0 text-sm"
+            >
               <Filter className="w-4 h-4" />
               Filter By
-            </button>
+            </motion.button>
             <div className="relative w-full max-w-md">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                 <Search className="w-4 h-4 text-gray-400" />
               </div>
               <input
-                className="block w-full pl-10 pr-4 py-2 border border-gray-200 rounded-full leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-300 focus:border-gray-300 text-sm transition-colors text-[#374151]"
+                className="block w-full pl-10 pr-4 py-2 border border-gray-200 rounded-full leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-gray-300 text-sm transition-shadow text-[#374151]"
                 placeholder="Search Assignment"
                 type="text"
                 value={searchQuery}
@@ -119,8 +139,6 @@ export default function Home() {
               />
             </div>
           </div>
-
-          {/* Floating Create Assignment Button Removed */}
 
           {/* Assignment Cards Grid */}
           {isLoading ? (
@@ -136,17 +154,25 @@ export default function Home() {
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6 pb-24">
+            <motion.div 
+              variants={containerVariants}
+              initial="hidden"
+              animate="show"
+              className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6 pb-24"
+            >
               {filteredAssessments.length === 0 ? (
                 <div className="col-span-1 md:col-span-2 text-center py-12 text-gray-500">
                   No assignments match your search.
                 </div>
               ) : filteredAssessments.map((assessment) => (
-                  <article
+                  <motion.article
+                    variants={itemVariants}
+                    whileHover={{ y: -4, scale: 1.01 }}
+                    whileTap={{ scale: 0.99 }}
                     key={assessment._id}
-                  onClick={() => handleOpenAssessment(assessment._id, assessment.status)}
-                  className="bg-white rounded-3xl p-6 relative shadow-sm border border-gray-100 flex flex-col h-[180px] justify-between cursor-pointer hover:shadow-md transition-shadow group"
-                >
+                    onClick={() => handleOpenAssessment(assessment._id, assessment.status)}
+                    className="bg-white rounded-3xl p-6 relative shadow-sm border border-gray-100 flex flex-col h-[180px] justify-between cursor-pointer hover:shadow-lg hover:border-gray-200 transition-shadow group"
+                  >
                   {/* Card Top: Title + Menu */}
                   <div className="flex justify-between items-start">
                     <h2 className="text-2xl font-extrabold text-[#111827] tracking-tight pr-4 line-clamp-2">
@@ -164,22 +190,30 @@ export default function Home() {
                   </div>
 
                   {/* Dropdown Menu */}
-                  {openMenuId === assessment._id && (
-                    <div className="absolute top-12 right-6 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-20">
-                      <button
-                        onClick={(e) => { e.stopPropagation(); handleOpenAssessment(assessment._id, assessment.status); }}
-                        className="block w-full text-left px-4 py-2 text-sm text-[#374151] hover:bg-gray-50 font-medium"
+                  <AnimatePresence>
+                    {openMenuId === assessment._id && (
+                      <motion.div 
+                        initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                        transition={{ duration: 0.15 }}
+                        className="absolute top-12 right-6 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-20"
                       >
-                        View Assignment
-                      </button>
-                      <button
-                        onClick={(e) => handleDelete(e, assessment._id)}
-                        className="block w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50 font-medium mx-auto"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  )}
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleOpenAssessment(assessment._id, assessment.status); }}
+                          className="block w-full text-left px-4 py-2 text-sm text-[#374151] hover:bg-gray-50 font-medium"
+                        >
+                          View Assignment
+                        </button>
+                        <button
+                          onClick={(e) => handleDelete(e, assessment._id)}
+                          className="block w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50 font-medium mx-auto"
+                        >
+                          Delete
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
                   {/* Card Bottom: Dates */}
                   <div className="flex justify-between items-center text-sm mt-auto font-medium">
@@ -191,20 +225,22 @@ export default function Home() {
                       {assessment.dueDate ? formatDate(assessment.dueDate) : formatDate(assessment.createdAt)}
                     </span>
                   </div>
-                </article>
+                </motion.article>
               ))}
-            </div>
+            </motion.div>
           )}
 
           {/* Floating Create Assignment Button */}
           <div className="sticky bottom-8 flex justify-center z-20 pointer-events-none mt-auto">
-            <button
+            <motion.button
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => router.push('/create')}
-              className="pointer-events-auto bg-[#1a1c23] hover:bg-black text-white font-medium py-3 px-6 rounded-full flex items-center gap-2 shadow-lg transition-transform transform hover:scale-105 active:scale-95"
+              className="pointer-events-auto bg-[#1a1c23] hover:bg-black text-white font-medium py-3 px-6 rounded-full flex items-center gap-2 shadow-[0_8px_30px_rgba(0,0,0,0.12)] hover:shadow-[0_8px_40px_rgba(0,0,0,0.16)] transition-shadow"
             >
               <Plus className="w-4 h-4" strokeWidth={2.5} />
               Create Assignment
-            </button>
+            </motion.button>
           </div>
         </div>
       )}

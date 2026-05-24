@@ -2,6 +2,9 @@ import React, { useEffect } from "react";
 import { LayoutGrid, Users, FileText, Smartphone, Clock, Settings, Sparkles, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { motion } from "framer-motion";
+
+const MotionLink = motion.create(Link);
 
 interface SidebarProps {
   isOpen?: boolean;
@@ -47,67 +50,75 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
           </Link>
 
           {/* Create Assignment Button */}
-          <Link
+          <MotionLink
             href="/create"
-            className="w-full h-12 rounded-full bg-gradient-to-r from-[#2A2A2A] to-[#1A1A1A] text-white flex items-center justify-center gap-2 font-medium text-[15px] shadow-[0_0_0_2px_#f97316] hover:from-[#3A3A3A] hover:to-[#2A2A2A] transition-all duration-200"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="w-full h-12 rounded-full bg-gradient-to-r from-[#2A2A2A] to-[#1A1A1A] text-white flex items-center justify-center gap-2 font-medium text-[15px] shadow-[0_0_0_2px_#f97316] hover:from-[#3A3A3A] hover:to-[#2A2A2A] transition-colors duration-200"
           >
             <Sparkles className="w-4 h-4 text-white" />
             Create Assignment
-          </Link>
+          </MotionLink>
         </div>
 
         {/* Navigation Links */}
         <nav className="flex-1 px-4 py-4 flex flex-col gap-1 overflow-y-auto">
-          <Link
-            href="/dashboard"
-            className="flex items-center gap-3 px-4 py-3 rounded-xl text-[#6B7280] hover:bg-[#F3F4F6] hover:text-[#111827] transition-colors duration-150 font-medium text-[15px]"
-          >
-            <LayoutGrid className="w-5 h-5" />
-            Home
-          </Link>
-          <Link
-            href="/groups"
-            className="flex items-center gap-3 px-4 py-3 rounded-xl text-[#6B7280] hover:bg-[#F3F4F6] hover:text-[#111827] transition-colors duration-150 font-medium text-[15px]"
-          >
-            <Users className="w-5 h-5" />
-            My Groups
-          </Link>
-          <Link
-            href="/dashboard"
-            className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#F3F4F6] text-[#111827] transition-colors duration-150"
-          >
-            <FileText className="w-5 h-5" />
-            <span className="font-semibold text-[15px]">Assignments</span>
-          </Link>
-          <Link
-            href="/toolkit"
-            className="flex items-center gap-3 px-4 py-3 rounded-xl text-[#6B7280] hover:bg-[#F3F4F6] hover:text-[#111827] transition-colors duration-150 font-medium text-[15px]"
-          >
-            <Smartphone className="w-5 h-5" />
-            AI Teacher&apos;s Toolkit
-          </Link>
-          <Link
-            href="/library"
-            className="flex items-center gap-3 px-4 py-3 rounded-xl text-[#6B7280] hover:bg-[#F3F4F6] hover:text-[#111827] transition-colors duration-150 font-medium text-[15px]"
-          >
-            <Clock className="w-5 h-5" />
-            My Library
-          </Link>
+          {[
+            { name: "Home", href: "/dashboard", icon: LayoutGrid },
+            { name: "My Groups", href: "/groups", icon: Users },
+            { name: "Assignments", href: "/dashboard", icon: FileText },
+            { name: "AI Teacher's Toolkit", href: "/toolkit", icon: Smartphone },
+            { name: "My Library", href: "/library", icon: Clock },
+          ].map((item, index) => {
+            const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href) && item.name !== "Home" && item.name !== "Assignments") || (item.name === "Assignments" && (pathname === "/dashboard" || pathname === "/create" || pathname === "/output" || pathname === "/generate"));
+            return (
+              <MotionLink
+                key={index}
+                href={item.name === "Home" ? "/" : item.href}
+                whileHover={{ x: 4, backgroundColor: "var(--color-gray-50)" }}
+                whileTap={{ scale: 0.98 }}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-[15px] ${
+                  (item.name === "Home" && pathname === "/") || (item.name !== "Home" && (pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href))))
+                    ? "bg-[#F3F4F6] text-[#111827] font-semibold shadow-sm"
+                    : "text-[#6B7280] hover:text-[#111827] font-medium"
+                }`}
+              >
+                <item.icon className={`w-5 h-5 transition-colors ${
+                  (item.name === "Home" && pathname === "/") || (item.name !== "Home" && (pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href))))
+                    ? "text-[#111827]"
+                    : "text-[#9CA3AF] group-hover:text-[#6B7280]"
+                }`} />
+                <span>{item.name}</span>
+              </MotionLink>
+            );
+          })}
         </nav>
 
         {/* Bottom Section: Settings + Profile */}
         <div className="p-4 flex flex-col gap-2 mt-auto">
           {/* Settings */}
-          <Link
+          <MotionLink
             href="/settings"
-            className="flex items-center gap-3 px-4 py-3 rounded-xl text-[#6B7280] hover:bg-[#F3F4F6] hover:text-[#111827] transition-colors duration-150 font-medium text-[15px] mb-2"
+            whileHover={{ x: 4, backgroundColor: "var(--color-gray-50)" }}
+            whileTap={{ scale: 0.98 }}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-[15px] mb-2 ${
+              pathname.startsWith("/settings")
+                ? "bg-[#F3F4F6] text-[#111827] font-semibold shadow-sm"
+                : "text-[#6B7280] hover:text-[#111827] font-medium"
+            }`}
           >
-            <Settings className="w-5 h-5" />
+            <Settings className={`w-5 h-5 transition-colors ${
+              pathname.startsWith("/settings") ? "text-[#111827]" : "text-[#9CA3AF]"
+            }`} />
             Settings
-          </Link>
+          </MotionLink>
 
           {/* School Profile Card */}
-          <div className="bg-[#F3F4F6] rounded-2xl p-3 flex items-center gap-3 cursor-pointer hover:bg-[#E5E7EB] transition-colors duration-150">
+          <motion.div 
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="bg-[#F3F4F6] rounded-2xl p-3 flex items-center gap-3 cursor-pointer hover:bg-[#E5E7EB] transition-colors duration-150"
+          >
             <img
               alt="Delhi Public School Avatar"
               className="w-12 h-12 rounded-full object-cover shrink-0"
@@ -117,7 +128,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
               <span className="text-[#111827] font-bold text-[14px] leading-tight truncate">Delhi Public School</span>
               <span className="text-[#6B7280] text-[13px] truncate">Bokaro Steel City</span>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </aside>

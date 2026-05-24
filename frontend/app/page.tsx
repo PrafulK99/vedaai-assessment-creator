@@ -1,34 +1,18 @@
 "use client";
 
-import React, { useEffect } from 'react';
+import React, { useRef } from 'react';
 import Link from 'next/link';
+import { motion, useScroll, useTransform } from 'framer-motion';
 
 export default function LandingPage() {
-  useEffect(() => {
-    const handleScroll = () => {
-      const mockup = document.querySelector('.mockup-container') as HTMLElement;
-      if (!mockup) return;
-      const rect = mockup.getBoundingClientRect();
-      const viewHeight = Math.max(document.documentElement.clientHeight, window.innerHeight);
-      
-      if (rect.top <= viewHeight && rect.bottom >= 0) {
-        mockup.style.transform = 'translateY(' + Math.max(0, 100 - (viewHeight - rect.top) * 0.1) + 'px)';
-        mockup.style.opacity = Math.min(1, (viewHeight - rect.top) * 0.002).toString();
-      }
-    };
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end start"]
+  });
 
-    window.addEventListener('scroll', handleScroll);
-    
-    // Initialize state
-    const mockup = document.querySelector('.mockup-container') as HTMLElement;
-    if (mockup) {
-      mockup.style.transition = 'transform 1s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 1s ease';
-      mockup.style.transform = 'translateY(50px)';
-      mockup.style.opacity = '0';
-    }
-
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  // Parallax effect for the background blurs
+  const bgY = useTransform(scrollYProgress, [0, 1], [0, 200]);
 
   const scrollToDemo = () => {
     const mockup = document.querySelector('.mockup-container') as HTMLElement;
@@ -37,252 +21,344 @@ export default function LandingPage() {
     }
   };
 
-  return (
-    <div className="bg-ld-surface text-ld-on-surface font-ld-body-md selection:bg-ld-primary-fixed selection:text-ld-on-primary-fixed min-h-screen">
-      
-{/**/}
-<nav className="bg-ld-surface/80 dark:bg-ld-surface-container/80 backdrop-blur-md sticky top-0 z-50 border-b border-ld-outline-variant/30">
-<div className="flex justify-between items-center px-ld-gutter py-4 max-w-ld-container-max mx-auto">
-<Link href="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
-<img alt="VedaAI Logo" className="h-10 w-10 object-contain rounded-lg" src="https://res.cloudinary.com/dgqapabyw/image/upload/v1779559976/ChatGPT_Image_May_23_2026_11_41_50_PM_knbyae.png"/>
-<span className="text-ld-headline-md font-ld-headline-md font-bold text-ld-on-surface dark:text-ld-inverse-on-surface">VedaAI</span>
-</Link>
-<div className="hidden md:flex items-center gap-8">
-<Link className="font-ld-label-md text-ld-label-md text-ld-primary dark:text-ld-primary-fixed font-bold border-b-2 border-ld-primary" href="/dashboard">Home</Link>
-<Link className="font-ld-label-md text-ld-label-md text-ld-on-surface-variant hover:text-ld-primary transition-all duration-200" href="/dashboard">Solutions</Link>
-<Link className="font-ld-label-md text-ld-label-md text-ld-on-surface-variant hover:text-ld-primary transition-all duration-200" href="/dashboard">Teachers</Link>
-<Link className="font-ld-label-md text-ld-label-md text-ld-on-surface-variant hover:text-ld-primary transition-all duration-200" href="/dashboard">About Us</Link>
-<Link className="font-ld-label-md text-ld-label-md text-ld-on-surface-variant hover:text-ld-primary transition-all duration-200" href="/dashboard">Careers</Link>
-</div>
-<button className="bg-ld-inverse-surface text-ld-inverse-on-surface px-6 py-2.5 rounded-full font-ld-label-md text-ld-label-md hover:scale-[0.98] transition-transform duration-200">
-                Contact Us
-            </button>
-</div>
-</nav>
-<main className="overflow-x-hidden">
-{/**/}
-<section className="relative pt-20 pb-32 px-ld-gutter">
-{/**/}
-<div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full -z-10 opacity-20 pointer-events-none">
-<div className="absolute top-20 left-10 w-72 h-72 bg-ld-primary-container rounded-full blur-[120px]"></div>
-<div className="absolute bottom-40 right-10 w-96 h-96 bg-ld-surface-container-high rounded-full blur-[100px]"></div>
-</div>
-<div className="max-w-ld-container-max mx-auto text-center flex flex-col items-center">
-{/**/}
-<div className="inline-flex items-center gap-2 px-4 py-1.5 bg-ld-surface-container-high border border-ld-outline-variant/30 rounded-full mb-8 hover:bg-ld-surface-variant transition-colors cursor-default">
-<span className="material-symbols-outlined text-[18px] text-ld-primary" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
-<span className="font-ld-label-sm text-ld-label-sm uppercase tracking-wider text-ld-on-surface-variant">AI-Powered Academic Workflow Platform</span>
-</div>
-{/**/}
-<h1 className="font-ld-display-lg text-ld-display-lg max-w-4xl mb-6 text-ld-on-surface">
-                    AI Assessment Creation &amp; 
-                    <span className="inline-block mt-2 px-6 py-2 bg-[#FFE6D6] text-ld-primary rounded-full border border-[#FFCCB4]">
-                        Intelligence Platform
-                    </span>
-</h1>
-{/**/}
-<p className="font-ld-body-lg text-ld-body-lg text-ld-on-surface-variant max-w-2xl mb-12">
-                    Generate structured, curriculum-ready assessments with AI-powered workflows designed for modern educators and institutions.
-                </p>
-{/**/}
-<div className="flex flex-col sm:flex-row gap-4 items-center">
-<Link href="/dashboard" className="bg-ld-primary text-ld-on-primary px-8 py-4 rounded-xl font-ld-label-md text-ld-label-md flex items-center gap-2 hover:bg-ld-primary/90 transition-all shadow-lg shadow-ld-primary/20">
-                        Launch Dashboard
-                        <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
-</Link>
-<button className="bg-ld-surface border border-ld-outline px-8 py-4 rounded-xl font-ld-label-md text-ld-label-md hover:bg-ld-surface-container-low transition-all">
-                        View Demo
-                    </button>
-</div>
-{/**/}
-<div className="mt-20 relative w-full max-w-5xl mx-auto group mockup-container">
-{/**/}
-<div className="absolute inset-0 bg-ld-primary/10 blur-[100px] -z-10 rounded-full scale-90 group-hover:scale-100 transition-transform duration-700"></div>
-<div className="bg-ld-surface-container-lowest p-4 rounded-[32px] border border-ld-outline-variant/40 brand-shadow">
-<div className="bg-ld-surface-container rounded-[24px] overflow-hidden border border-ld-outline-variant/20 flex min-h-[600px]">
-{/**/}
-<aside className="w-64 bg-ld-surface-container-lowest border-r border-ld-outline-variant/20 p-6 flex flex-col">
-<div className="flex items-center gap-3 mb-10">
-<img alt="Logo" className="h-8 w-8" src="https://res.cloudinary.com/dgqapabyw/image/upload/v1779559976/ChatGPT_Image_May_23_2026_11_41_50_PM_knbyae.png"/>
-<span className="font-ld-headline-md text-ld-headline-md text-ld-on-surface font-bold text-lg">VedaAI</span>
-</div>
-<button className="w-full bg-ld-on-surface text-ld-surface py-3 rounded-xl flex items-center justify-center gap-2 mb-8 font-ld-label-md text-ld-label-md hover:opacity-90">
-<span className="material-symbols-outlined text-[18px]">add_circle</span>
-                                    Create Assignment
-                                </button>
-<nav className="space-y-1">
-<Link className="flex items-center gap-3 px-4 py-3 rounded-lg text-ld-on-surface-variant hover:bg-ld-surface-container-low" href="/dashboard">
-<span className="material-symbols-outlined">grid_view</span>
-<span className="font-ld-label-md text-ld-label-md">Home</span>
-</Link>
-<Link className="flex items-center gap-3 px-4 py-3 rounded-lg text-ld-on-surface-variant hover:bg-ld-surface-container-low" href="/dashboard">
-<span className="material-symbols-outlined">group</span>
-<span className="font-ld-label-md text-ld-label-md">My Groups</span>
-</Link>
-<Link className="flex items-center gap-3 px-4 py-3 rounded-lg bg-ld-primary-container/10 text-ld-primary border-l-4 border-ld-primary" href="/dashboard">
-<span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>assignment</span>
-<span className="font-ld-label-md text-ld-label-md font-bold">Assignments</span>
-<span className="ml-auto bg-ld-primary text-ld-on-primary px-2 py-0.5 rounded-full text-[10px]">10</span>
-</Link>
-<Link className="flex items-center gap-3 px-4 py-3 rounded-lg text-ld-on-surface-variant hover:bg-ld-surface-container-low" href="/dashboard">
-<span className="material-symbols-outlined">school</span>
-<span className="font-ld-label-md text-ld-label-md">AI Toolkit</span>
-</Link>
-</nav>
-</aside>
-{/**/}
-<main className="flex-1 p-8 bg-ld-surface/40">
-<header className="flex justify-between items-center mb-10">
-<div>
-<h2 className="font-ld-headline-md text-ld-headline-md text-ld-on-surface">Assignments</h2>
-<p className="font-ld-body-md text-ld-body-md text-ld-on-surface-variant">Manage and create assessments for your classes.</p>
-</div>
-<div className="flex items-center gap-4">
-<div className="relative">
-<span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-ld-on-surface-variant">search</span>
-<input className="pl-10 pr-4 py-2 bg-ld-surface-container-lowest border border-ld-outline-variant/30 rounded-full w-64 focus:outline-none focus:border-ld-primary" placeholder="Search..." type="text"/>
-</div>
-<div className="h-10 w-10 rounded-full bg-ld-secondary-container flex items-center justify-center overflow-hidden">
-<img alt="Profile" className="w-full h-full object-cover" data-alt="A professional headshot of a friendly educator wearing glasses and a smart casual blazer, set against a clean, softly lit academic office background. High-key lighting highlights the professional yet approachable atmosphere of the VedaAI platform interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDSnBqyTnSwxs5QHsAIrOHOcOyQ2J7vKbMSdBpNUoedCOjqAi7RQ9egjzw0Ft90KeNeDIEV01T41YcitIYb3qkzXUPQqPMeyXEVxsdF-Fjju0_6kGcY2z9o6RpbOV8H1cWnyTLPrM9leZL2pZwKv0uFYNKKNJy8RLpPB8juQrO5c_yWA6Yjkhzt5XKFrwVEY4AgTNnVTzVYSwn6KW1_7NkZoq91l2v9fFIsoYESA7gFZpYLh7ihiEjFhHqWjAqUyc5aY_k5K0rkDaE"/>
-</div>
-</div>
-</header>
-{/**/}
-<div className="bg-ld-primary/5 border-l-4 border-ld-primary p-4 rounded-r-xl mb-8 flex items-center justify-between">
-<div className="flex items-center gap-4">
-<div className="w-8 h-8 flex items-center justify-center bg-ld-primary rounded-full animate-pulse">
-<span className="material-symbols-outlined text-ld-on-primary text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>bolt</span>
-</div>
-<div>
-<p className="font-ld-label-md text-ld-label-md text-ld-on-surface">AI is generating "Physics Finals - Set B"</p>
-<div className="w-48 h-1 bg-ld-outline-variant/30 rounded-full mt-1 overflow-hidden">
-<div className="h-full bg-ld-primary w-[75%] rounded-full"></div>
-</div>
-</div>
-</div>
-<span className="font-ld-label-sm text-ld-label-sm text-ld-primary font-bold">75% Complete</span>
-</div>
-{/**/}
-<div className="grid grid-cols-2 gap-4">
-<div className="bg-ld-surface-container-lowest p-6 rounded-2xl border border-ld-outline-variant/20 hover:shadow-lg transition-shadow">
-<div className="flex justify-between items-start mb-4">
-<h3 className="font-ld-headline-md text-[18px] text-ld-on-surface">Quiz on Electricity</h3>
-<span className="material-symbols-outlined text-ld-on-surface-variant cursor-pointer">more_vert</span>
-</div>
-<div className="space-y-2 mb-6">
-<div className="flex items-center gap-2 text-ld-on-surface-variant font-ld-label-sm text-ld-label-sm">
-<span className="material-symbols-outlined text-[16px]">calendar_today</span>
-                                                Assigned on: 20-06-2025
-                                            </div>
-<div className="flex items-center gap-2 text-ld-on-surface-variant font-ld-label-sm text-ld-label-sm">
-<span className="material-symbols-outlined text-[16px]">schedule</span>
-                                                Due: 21-06-2025
-                                            </div>
-</div>
-<div className="flex -space-x-2">
-<div className="w-8 h-8 rounded-full border-2 border-ld-surface-container-lowest bg-slate-200"></div>
-<div className="w-8 h-8 rounded-full border-2 border-ld-surface-container-lowest bg-slate-300"></div>
-<div className="w-8 h-8 rounded-full border-2 border-ld-surface-container-lowest bg-slate-400 flex items-center justify-center text-[10px] text-ld-on-surface font-bold">+24</div>
-</div>
-</div>
-<div className="bg-ld-surface-container-lowest p-6 rounded-2xl border border-ld-outline-variant/20 hover:shadow-lg transition-shadow relative overflow-hidden">
-{/**/}
-<div className="absolute inset-0 bg-ld-on-surface/5 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-<div className="bg-ld-surface-container-lowest p-2 rounded-xl border border-ld-outline-variant/30 flex flex-col gap-1 w-40 brand-shadow">
-<button className="text-left px-3 py-2 hover:bg-ld-surface-container-low rounded-lg font-ld-label-md text-ld-label-md text-ld-on-surface">View Assignment</button>
-<button className="text-left px-3 py-2 hover:bg-ld-error-container text-ld-error rounded-lg font-ld-label-md text-ld-label-md">Delete</button>
-</div>
-</div>
-<div className="flex justify-between items-start mb-4">
-<h3 className="font-ld-headline-md text-[18px] text-ld-on-surface">Organic Chemistry I</h3>
-<span className="material-symbols-outlined text-ld-on-surface-variant">more_vert</span>
-</div>
-<div className="space-y-2 mb-6">
-<div className="flex items-center gap-2 text-ld-on-surface-variant font-ld-label-sm text-ld-label-sm">
-<span className="material-symbols-outlined text-[16px]">calendar_today</span>
-                                                Assigned on: 18-06-2025
-                                            </div>
-<div className="flex items-center gap-2 text-ld-on-surface-variant font-ld-label-sm text-ld-label-sm">
-<span className="material-symbols-outlined text-[16px]">schedule</span>
-                                                Due: 25-06-2025
-                                            </div>
-</div>
-<div className="flex items-center gap-2">
-<span className="px-2 py-1 bg-ld-primary-container/20 text-ld-primary rounded-md text-[10px] font-bold">ACTIVE</span>
-<span className="px-2 py-1 bg-ld-surface-container-high text-ld-on-surface-variant rounded-md text-[10px] font-bold">120 MINS</span>
-</div>
-</div>
-</div>
-</main>
-</div>
-</div>
-{/**/}
-<div className="absolute -top-10 -right-12 w-64 bg-white p-5 rounded-2xl border border-ld-outline-variant/30 brand-shadow hidden lg:block transform hover:translate-y-[-4px] transition-transform">
-<div className="flex items-center gap-3 mb-4">
-<div className="p-2 bg-ld-primary/10 rounded-lg">
-<span className="material-symbols-outlined text-ld-primary">analytics</span>
-</div>
-<span className="font-ld-label-md text-ld-label-md text-ld-on-surface font-bold">Insights</span>
-</div>
-<p className="font-ld-body-md text-[13px] text-ld-on-surface-variant leading-relaxed">
-                            Learning gap detected in <span className="text-ld-primary font-bold">Ohm's Law Application</span>. 23% of students missed this concept.
-                        </p>
-</div>
-<div className="absolute -bottom-10 -left-12 w-56 bg-white p-5 rounded-2xl border border-ld-outline-variant/30 brand-shadow hidden lg:block transform hover:translate-y-[-4px] transition-transform">
-<div className="flex items-center justify-between mb-4">
-<span className="font-ld-label-sm text-ld-label-sm text-ld-on-surface-variant">Completion Rate</span>
-<span className="text-ld-primary font-bold">95%</span>
-</div>
-<div className="w-full h-2 bg-ld-outline-variant/20 rounded-full overflow-hidden">
-<div className="h-full bg-ld-primary w-[95%]"></div>
-</div>
-</div>
-</div>
-</div>
-</section>
-{/**/}
-<section className="py-12 border-y border-ld-outline-variant/20 bg-ld-surface-container-low/30 overflow-hidden">
-<div className="max-w-ld-container-max mx-auto px-ld-gutter text-center">
-<p className="font-ld-label-sm text-ld-label-sm text-ld-on-surface-variant/60 uppercase tracking-widest mb-8">Trusted &amp; Incubated By</p>
-<div className="flex flex-wrap justify-center items-center gap-12 opacity-70 grayscale hover:grayscale-0 transition-all duration-500">
-<div className="flex items-center gap-2">
-<div className="w-10 h-10 rounded-full bg-ld-error/10 flex items-center justify-center">
-<span className="material-symbols-outlined text-ld-error text-[20px]">school</span>
-</div>
-<span className="font-ld-headline-md text-ld-on-surface">IIM Bangalore</span>
-</div>
-<div className="font-ld-display-lg text-[24px] text-ld-on-surface-variant font-bold tracking-tighter italic">ED-TECH ACCELERATOR</div>
-<div className="flex items-center gap-2">
-<span className="material-symbols-outlined text-ld-on-surface">verified_user</span>
-<span className="font-ld-headline-md text-ld-on-surface">CBSE Compliance Hub</span>
-</div>
-<div className="flex items-center gap-2">
-<span className="material-symbols-outlined text-ld-on-surface">language</span>
-<span className="font-ld-headline-md text-ld-on-surface">Global Edu Standards</span>
-</div>
-</div>
-</div>
-</section>
-</main>
-{/**/}
-<footer className="bg-ld-surface border-t border-ld-outline-variant/20">
-<div className="flex flex-col md:flex-row justify-between items-center px-ld-gutter py-8 max-w-ld-container-max mx-auto">
-<div className="flex items-center gap-3 mb-6 md:mb-0">
-<img alt="Logo" className="h-8 w-8" src="https://res.cloudinary.com/dgqapabyw/image/upload/v1779559976/ChatGPT_Image_May_23_2026_11_41_50_PM_knbyae.png"/>
-<span className="text-ld-headline-md font-ld-headline-md font-bold text-ld-on-surface">VedaAI</span>
-</div>
-<div className="flex flex-wrap justify-center gap-8 mb-6 md:mb-0">
-<Link className="font-ld-label-sm text-ld-label-sm text-ld-on-surface-variant hover:underline hover:text-ld-primary transition-all" href="/dashboard">Privacy Policy</Link>
-<Link className="font-ld-label-sm text-ld-label-sm text-ld-on-surface-variant hover:underline hover:text-ld-primary transition-all" href="/dashboard">Terms of Service</Link>
-<Link className="font-ld-label-sm text-ld-label-sm text-ld-on-surface-variant hover:underline hover:text-ld-primary transition-all" href="/dashboard">Contact</Link>
-<Link className="font-ld-label-sm text-ld-label-sm text-ld-on-surface-variant hover:underline hover:text-ld-primary transition-all" href="/dashboard">Cookie Policy</Link>
-</div>
-<p className="font-ld-body-md text-[13px] text-ld-on-surface-variant/60">
-                © 2024 VedaAI. All rights reserved.
-            </p>
-</div>
-</footer>
+  // Common staggered variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.1,
+      }
+    }
+  };
 
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { type: "spring" as const, stiffness: 300, damping: 24 }
+    }
+  };
+
+  return (
+    <div className="bg-[#FAFAFA] text-ld-on-surface font-ld-body-md selection:bg-orange-100 selection:text-orange-900 min-h-screen font-sans" ref={containerRef}>
+      
+      {/* Navbar */}
+      <motion.nav 
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="bg-white/80 backdrop-blur-xl sticky top-0 z-50 border-b border-gray-200/60"
+      >
+        <div className="flex justify-between items-center px-6 md:px-12 py-4 max-w-7xl mx-auto">
+          <Link href="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
+            <img alt="VedaAI Logo" className="h-9 w-9 object-contain rounded-[10px] shadow-sm border border-gray-100" src="https://res.cloudinary.com/dgqapabyw/image/upload/v1779559976/ChatGPT_Image_May_23_2026_11_41_50_PM_knbyae.png"/>
+            <span className="text-[20px] font-extrabold text-gray-900 tracking-tight">VedaAI</span>
+          </Link>
+          <div className="hidden md:flex items-center gap-8">
+            <Link className="text-sm font-semibold text-gray-900" href="/dashboard">Home</Link>
+            <Link className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors" href="/dashboard">Solutions</Link>
+            <Link className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors" href="/dashboard">Teachers</Link>
+            <Link className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors" href="/dashboard">About Us</Link>
+          </div>
+          <motion.button 
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="bg-gray-900 text-white px-5 py-2 rounded-full text-sm font-semibold shadow-md hover:bg-black transition-colors"
+          >
+            Contact Us
+          </motion.button>
+        </div>
+      </motion.nav>
+
+      <main className="overflow-x-hidden">
+        <section className="relative pt-24 md:pt-32 pb-32 px-6 md:px-12">
+          {/* Background Ambient Glows */}
+          <motion.div 
+            style={{ y: bgY }}
+            className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full -z-10 opacity-40 pointer-events-none"
+          >
+            <div className="absolute top-0 left-10 w-[400px] h-[400px] bg-orange-100/60 rounded-full blur-[120px]"></div>
+            <div className="absolute bottom-20 right-10 w-[500px] h-[500px] bg-blue-50/60 rounded-full blur-[120px]"></div>
+          </motion.div>
+
+          <motion.div 
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="max-w-4xl mx-auto text-center flex flex-col items-center"
+          >
+            <motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-4 py-1.5 bg-white border border-gray-200/60 rounded-full mb-8 shadow-sm">
+              <span className="material-symbols-outlined text-[16px] text-orange-500">auto_awesome</span>
+              <span className="text-[13px] font-bold text-gray-600 tracking-wide uppercase">AI-Powered Workflow</span>
+            </motion.div>
+
+            <motion.h1 variants={itemVariants} className="text-[48px] sm:text-[64px] lg:text-[76px] leading-[1.05] font-extrabold mb-6 text-gray-900 tracking-tight">
+              AI Assessment Creation &amp; <br />
+              <span className="inline-block mt-2 px-5 py-2 bg-orange-50/80 text-orange-500 rounded-[2rem] border border-orange-100 shadow-sm relative">
+                Intelligence Platform
+              </span>
+            </motion.h1>
+
+            <motion.p variants={itemVariants} className="text-[18px] sm:text-[20px] text-gray-500 max-w-2xl mb-12 leading-relaxed font-medium">
+              Generate structured, curriculum-ready assessments with AI workflows designed for modern educators and institutions.
+            </motion.p>
+
+            <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4 items-center">
+              <Link href="/dashboard">
+                <motion.button 
+                  whileHover={{ scale: 1.02, y: -2 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="bg-orange-500 text-white px-8 py-4 rounded-2xl text-[16px] font-bold flex items-center gap-2 shadow-[0_8px_30px_rgb(249,115,22,0.3)] hover:shadow-[0_8px_40px_rgb(249,115,22,0.4)] transition-shadow relative overflow-hidden group"
+                >
+                  <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></div>
+                  <span className="relative z-10">Launch Dashboard</span>
+                  <span className="material-symbols-outlined text-[20px] relative z-10 group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                </motion.button>
+              </Link>
+              <motion.button 
+                onClick={scrollToDemo}
+                whileHover={{ scale: 1.02, backgroundColor: "#F3F4F6" }}
+                whileTap={{ scale: 0.98 }}
+                className="bg-white border border-gray-200 px-8 py-4 rounded-2xl text-[16px] font-bold text-gray-700 shadow-sm transition-colors"
+              >
+                View Demo
+              </motion.button>
+            </motion.div>
+          </motion.div>
+
+          {/* Dashboard Mockup Component */}
+          <motion.div 
+            initial={{ opacity: 0, y: 100 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+            className="mt-28 relative w-full max-w-5xl mx-auto group mockup-container perspective-[2000px] z-10"
+          >
+            <div className="absolute inset-0 bg-orange-500/5 blur-[100px] -z-10 rounded-full scale-90 group-hover:scale-105 transition-transform duration-1000"></div>
+            
+            <div className="bg-white/40 backdrop-blur-2xl p-3 sm:p-4 rounded-[36px] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1),0_0_0_1px_rgba(0,0,0,0.05),inset_0_1px_0_rgba(255,255,255,0.6)] border border-white/60 relative transform-gpu hover:rotate-x-1 hover:-translate-y-2 transition-all duration-700 ease-out">
+              {/* Fake Mac Buttons */}
+              <div className="absolute top-8 left-8 flex gap-2 z-20">
+                <div className="w-3 h-3 rounded-full bg-[#FF5F56] border border-[#E0443E]"></div>
+                <div className="w-3 h-3 rounded-full bg-[#FFBD2E] border border-[#DEA123]"></div>
+                <div className="w-3 h-3 rounded-full bg-[#27C93F] border border-[#1AAB29]"></div>
+              </div>
+
+              <div className="bg-white rounded-[24px] overflow-hidden border border-gray-200/60 flex min-h-[650px] shadow-[inset_0_1px_0_rgba(255,255,255,1)] relative z-10">
+                {/* Sidebar */}
+                <aside className="w-64 bg-gray-50/50 border-r border-gray-100 p-6 flex flex-col relative z-20">
+                  <div className="flex items-center gap-3 mb-12 pl-6 mt-1">
+                    <img alt="Logo" className="h-8 w-8 shadow-sm rounded-md object-contain border border-gray-100 bg-white" src="https://res.cloudinary.com/dgqapabyw/image/upload/v1779559976/ChatGPT_Image_May_23_2026_11_41_50_PM_knbyae.png"/>
+                    <span className="text-[18px] text-gray-900 font-extrabold tracking-tight">VedaAI</span>
+                  </div>
+                  <button className="w-full bg-gradient-to-b from-gray-800 to-gray-900 text-white py-3 rounded-[14px] flex items-center justify-center gap-2 mb-8 text-sm font-semibold shadow-[0_2px_10px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,0.1)] hover:from-gray-700 hover:to-gray-800 transition-all">
+                    <span className="material-symbols-outlined text-[18px]">add_circle</span>
+                    Create Assignment
+                  </button>
+                  <nav className="space-y-1.5">
+                    <div className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-500 hover:bg-gray-100/50 transition-colors cursor-pointer">
+                      <span className="material-symbols-outlined text-[20px]">grid_view</span>
+                      <span className="text-sm font-semibold">Home</span>
+                    </div>
+                    <div className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-500 hover:bg-gray-100/50 transition-colors cursor-pointer">
+                      <span className="material-symbols-outlined text-[20px]">group</span>
+                      <span className="text-sm font-semibold">My Groups</span>
+                    </div>
+                    <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-orange-50/80 text-orange-600 transition-colors shadow-[inset_2px_0_0_var(--color-orange-500)] cursor-pointer">
+                      <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>assignment</span>
+                      <span className="text-sm font-bold">Assignments</span>
+                      <span className="ml-auto bg-orange-500 text-white px-2 py-0.5 rounded-full text-[10px] font-bold shadow-sm">10</span>
+                    </div>
+                    <div className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-500 hover:bg-gray-100/50 transition-colors cursor-pointer">
+                      <span className="material-symbols-outlined text-[20px]">school</span>
+                      <span className="text-sm font-semibold">AI Toolkit</span>
+                    </div>
+                  </nav>
+                </aside>
+
+                {/* Main Content */}
+                <main className="flex-1 p-10 bg-white">
+                  <header className="flex justify-between items-center mb-12">
+                    <div>
+                      <h2 className="text-[26px] font-extrabold text-gray-900 tracking-tight">Assignments</h2>
+                      <p className="text-[15px] text-gray-500 mt-1 font-medium">Manage and create assessments for your classes.</p>
+                    </div>
+                    <div className="flex items-center gap-5">
+                      <div className="relative">
+                        <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-[20px]">search</span>
+                        <input className="pl-11 pr-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-full w-64 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all text-sm shadow-sm font-medium text-gray-700" placeholder="Search..." type="text" readOnly />
+                      </div>
+                      <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200 shadow-sm">
+                        <img alt="Profile" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDSnBqyTnSwxs5QHsAIrOHOcOyQ2J7vKbMSdBpNUoedCOjqAi7RQ9egjzw0Ft90KeNeDIEV01T41YcitIYb3qkzXUPQqPMeyXEVxsdF-Fjju0_6kGcY2z9o6RpbOV8H1cWnyTLPrM9leZL2pZwKv0uFYNKKNJy8RLpPB8juQrO5c_yWA6Yjkhzt5XKFrwVEY4AgTNnVTzVYSwn6KW1_7NkZoq91l2v9fFIsoYESA7gFZpYLh7ihiEjFhHqWjAqUyc5aY_k5K0rkDaE"/>
+                      </div>
+                    </div>
+                  </header>
+
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.98, y: 10 }}
+                    whileInView={{ opacity: 1, scale: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, delay: 0.3 }}
+                    className="bg-white border border-gray-100 p-5 rounded-2xl mb-8 flex items-center justify-between shadow-[0_8px_30px_-4px_rgba(0,0,0,0.04)] relative overflow-hidden group"
+                  >
+                    <div className="absolute top-0 left-0 bottom-0 w-1.5 bg-orange-500"></div>
+                    <div className="flex items-center gap-4 pl-2">
+                      <div className="w-10 h-10 flex items-center justify-center bg-orange-50 rounded-full">
+                        <span className="material-symbols-outlined text-orange-500 text-[20px] animate-pulse" style={{ fontVariationSettings: "'FILL' 1" }}>bolt</span>
+                      </div>
+                      <div>
+                        <p className="text-[15px] font-bold text-gray-900">AI is generating "Physics Finals - Set B"</p>
+                        <div className="w-64 h-1.5 bg-gray-100 rounded-full mt-2.5 overflow-hidden">
+                          <motion.div 
+                            initial={{ width: 0 }}
+                            whileInView={{ width: "75%" }}
+                            transition={{ duration: 1.5, ease: "easeOut", delay: 0.6 }}
+                            className="h-full bg-orange-500 rounded-full relative"
+                          >
+                            <div className="absolute inset-0 bg-white/20 rounded-full animate-[shimmer_2s_infinite]"></div>
+                          </motion.div>
+                        </div>
+                      </div>
+                    </div>
+                    <span className="text-[13px] text-orange-600 font-bold bg-orange-50 px-3 py-1.5 rounded-full">75% Complete</span>
+                  </motion.div>
+
+                  <div className="grid grid-cols-2 gap-6">
+                    {[
+                      { title: "Quiz on Electricity", assigned: "20-06-2025", due: "21-06-2025" },
+                      { title: "Organic Chemistry I", assigned: "18-06-2025", due: "25-06-2025", active: true }
+                    ].map((card, i) => (
+                      <motion.div 
+                        key={i}
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.5, delay: 0.4 + (i * 0.1) }}
+                        whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                        className="bg-white p-7 rounded-[20px] border border-gray-100 shadow-[0_4px_12px_-4px_rgba(0,0,0,0.02)] cursor-pointer group hover:shadow-[0_12px_32px_-4px_rgba(0,0,0,0.06)] hover:border-gray-200/60 transition-all flex flex-col h-full"
+                      >
+                        <div className="flex justify-between items-start mb-6">
+                          <h3 className="text-[19px] font-extrabold text-gray-900 tracking-tight group-hover:text-orange-500 transition-colors">{card.title}</h3>
+                          <span className="material-symbols-outlined text-gray-300 hover:text-gray-500 transition-colors">more_vert</span>
+                        </div>
+                        <div className="space-y-3 mb-8">
+                          <div className="flex items-center gap-2.5 text-gray-500 font-semibold text-[13px]">
+                            <span className="material-symbols-outlined text-[16px] text-gray-400">calendar_today</span>
+                            Assigned on: <span className="text-gray-900">{card.assigned}</span>
+                          </div>
+                          <div className="flex items-center gap-2.5 text-gray-500 font-semibold text-[13px]">
+                            <span className="material-symbols-outlined text-[16px] text-gray-400">schedule</span>
+                            Due: <span className="text-gray-900">{card.due}</span>
+                          </div>
+                        </div>
+                        
+                        {card.active ? (
+                          <div className="flex items-center gap-2 mt-auto">
+                            <span className="px-3 py-1 bg-green-50 text-green-700 border border-green-100 rounded-lg text-[11px] font-bold tracking-wide">ACTIVE</span>
+                            <span className="px-3 py-1 bg-gray-50 text-gray-600 border border-gray-200 rounded-lg text-[11px] font-bold tracking-wide">120 MINS</span>
+                          </div>
+                        ) : (
+                          <div className="flex -space-x-2 mt-auto">
+                            <div className="w-9 h-9 rounded-full border-[3px] border-white bg-slate-100 shadow-sm"></div>
+                            <div className="w-9 h-9 rounded-full border-[3px] border-white bg-slate-200 shadow-sm"></div>
+                            <div className="w-9 h-9 rounded-full border-[3px] border-white bg-slate-300 flex items-center justify-center text-[11px] text-gray-900 font-bold shadow-sm">+24</div>
+                          </div>
+                        )}
+                      </motion.div>
+                    ))}
+                  </div>
+                </main>
+              </div>
+
+              {/* Decorative Insights Popup */}
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.8, x: -20 }}
+                whileInView={{ opacity: 1, scale: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.7, delay: 0.8, type: "spring", bounce: 0.4 }}
+                className="absolute -top-8 -right-12 w-[280px] bg-white/95 backdrop-blur-xl p-6 rounded-[24px] border border-gray-100 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.1)] hidden lg:block z-30 group-hover:translate-y-[-8px] group-hover:shadow-[0_30px_50px_-10px_rgba(0,0,0,0.15)] transition-all duration-500"
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2.5 bg-orange-50 rounded-xl">
+                    <span className="material-symbols-outlined text-orange-500 text-[20px]">analytics</span>
+                  </div>
+                  <span className="text-[15px] text-gray-900 font-extrabold tracking-tight">Smart Insights</span>
+                </div>
+                <p className="text-[14px] text-gray-500 font-medium leading-relaxed">
+                  Learning gap detected in <span className="text-orange-600 font-bold">Ohm's Law</span>. 23% of students missed this concept.
+                </p>
+              </motion.div>
+              
+              {/* Decorative Completion Popup */}
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.8, x: 20 }}
+                whileInView={{ opacity: 1, scale: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.7, delay: 0.9, type: "spring", bounce: 0.4 }}
+                className="absolute -bottom-6 -left-14 w-[240px] bg-white/95 backdrop-blur-xl p-6 rounded-[24px] border border-gray-100 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.1)] hidden lg:block z-30 group-hover:translate-y-[4px] group-hover:shadow-[0_30px_50px_-10px_rgba(0,0,0,0.15)] transition-all duration-500"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-[12px] font-extrabold text-gray-400 uppercase tracking-widest">Completion Rate</span>
+                  <span className="text-orange-500 font-extrabold text-[16px]">95%</span>
+                </div>
+                <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                  <motion.div 
+                    initial={{ width: 0 }}
+                    whileInView={{ width: "95%" }}
+                    transition={{ duration: 1.5, delay: 1.2, ease: "easeOut" }}
+                    className="h-full bg-orange-500 rounded-full"
+                  ></motion.div>
+                </div>
+              </motion.div>
+
+            </div>
+          </motion.div>
+        </section>
+
+        {/* Footer Logos */}
+        <section className="py-16 border-y border-gray-200/60 bg-gray-50/50 overflow-hidden">
+          <div className="max-w-7xl mx-auto px-6 md:px-12 text-center">
+            <p className="text-[12px] text-gray-400 uppercase tracking-[0.2em] font-extrabold mb-10">Trusted &amp; Incubated By</p>
+            <div className="flex flex-wrap justify-center items-center gap-x-16 gap-y-8 opacity-60 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-700">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center">
+                  <span className="material-symbols-outlined text-red-500 text-[20px]">school</span>
+                </div>
+                <span className="text-[18px] font-extrabold text-gray-900 tracking-tight">IIM Bangalore</span>
+              </div>
+              <div className="text-[22px] text-gray-400 font-black tracking-tighter italic">ED-TECH ACCELERATOR</div>
+              <div className="flex items-center gap-2.5">
+                <span className="material-symbols-outlined text-gray-500">verified_user</span>
+                <span className="text-[18px] font-extrabold text-gray-900 tracking-tight">CBSE Hub</span>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <span className="material-symbols-outlined text-gray-500">language</span>
+                <span className="text-[18px] font-extrabold text-gray-900 tracking-tight">Global Edu Standards</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer className="bg-white border-t border-gray-200/60">
+        <div className="flex flex-col md:flex-row justify-between items-center px-6 md:px-12 py-10 max-w-7xl mx-auto">
+          <div className="flex items-center gap-3 mb-6 md:mb-0">
+            <img alt="Logo" className="h-8 w-8 shadow-sm rounded-md border border-gray-100" src="https://res.cloudinary.com/dgqapabyw/image/upload/v1779559976/ChatGPT_Image_May_23_2026_11_41_50_PM_knbyae.png"/>
+            <span className="text-[18px] font-extrabold text-gray-900 tracking-tight">VedaAI</span>
+          </div>
+          <div className="flex flex-wrap justify-center gap-8 mb-6 md:mb-0">
+            <Link className="text-[14px] font-semibold text-gray-500 hover:text-orange-500 transition-colors" href="/dashboard">Privacy Policy</Link>
+            <Link className="text-[14px] font-semibold text-gray-500 hover:text-orange-500 transition-colors" href="/dashboard">Terms of Service</Link>
+            <Link className="text-[14px] font-semibold text-gray-500 hover:text-orange-500 transition-colors" href="/dashboard">Contact</Link>
+          </div>
+          <p className="text-[13px] font-medium text-gray-400">
+            © 2026 VedaAI. All rights reserved.
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }

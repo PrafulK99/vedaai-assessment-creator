@@ -16,6 +16,7 @@ export interface Section {
 
 export interface AssessmentContext {
   _id: string;
+  assignmentId: string;
   title: string;
   schoolName: string;
   subject: string;
