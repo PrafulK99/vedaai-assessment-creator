@@ -21,7 +21,7 @@ const clientUrl = process.env.CLIENT_URL || "http://localhost:3000";
 initSocket(httpServer, clientUrl);
 
 // Middleware
-app.use(cors());
+app.use(cors({ origin: clientUrl }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
