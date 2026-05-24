@@ -1,17 +1,24 @@
 import React from "react";
-import { ArrowLeft, Bell, ChevronDown, LayoutGrid } from "lucide-react";
+import { ArrowLeft, Bell, ChevronDown, LayoutGrid, Menu } from "lucide-react";
 
 interface HeaderProps {
   title?: string;
   showBackButton?: boolean;
   onBackClick?: () => void;
+  onMenuClick?: () => void;
 }
 
-export function Header({ title = "Assignment", showBackButton = true, onBackClick }: HeaderProps) {
+export function Header({ title = "Assignment", showBackButton = true, onBackClick, onMenuClick }: HeaderProps) {
   return (
     <header className="bg-sidebar-bg rounded-3xl p-4 px-6 flex items-center justify-between shadow-sm shrink-0" data-purpose="top-header">
-      {/* Left Section - Back Button and Title */}
+      {/* Left Section - Menu, Back Button and Title */}
       <div className="flex items-center gap-4 text-text-muted font-medium">
+        <button
+          onClick={onMenuClick}
+          className="lg:hidden hover:text-text-main transition-colors mr-2"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
         {showBackButton && (
           <button
             onClick={onBackClick}

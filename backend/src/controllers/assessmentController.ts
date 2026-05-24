@@ -137,6 +137,7 @@ export const generateAssessment = asyncHandler(
         subject: assignment.subject,
         classLevel: assignment.classLevel,
         timeAllowed: assignment.timeAllowed,
+        dueDate: assignment.dueDate,
         instructions: assignment.instructions,
         totalQuestions: assignment.totalQuestions,
         totalMarks: assignment.totalMarks,

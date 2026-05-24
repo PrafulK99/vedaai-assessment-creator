@@ -24,6 +24,7 @@ export interface IGeneratedAssessment extends Document {
   subject: string;
   classLevel: string;
   timeAllowed: string;
+  dueDate?: Date;
   sections: Section[];
   totalQuestions: number;
   totalMarks: number;
@@ -65,6 +66,7 @@ const generatedAssessmentSchema = new Schema<IGeneratedAssessment>(
     subject: { type: String, default: "" },
     classLevel: { type: String, default: "" },
     timeAllowed: { type: String, default: "" },
+    dueDate: { type: Date },
     sections: [sectionSchema],
     totalQuestions: { type: Number, default: 0 },
     totalMarks: { type: Number, default: 0 },

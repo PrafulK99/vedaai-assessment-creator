@@ -51,28 +51,28 @@ export default function AssessmentOutput() {
       <div className="max-w-4xl mx-auto pb-24 px-4 sm:px-6 lg:px-8">
         
         {/* Action Header - Hidden during print */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4 print:hidden">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4 print:hidden">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Your Assessment is Ready!</h1>
             <p className="text-sm text-gray-500 mt-1">Review, print or export your generated question paper.</p>
           </div>
           
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
             <button 
               onClick={handleShare}
-              className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors hidden sm:flex"
+              className="flex-1 md:flex-none items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors hidden sm:flex"
             >
               <Share2 className="w-4 h-4" /> Share
             </button>
             <button 
               onClick={() => router.push("/create")}
-              className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+              className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
             >
               <RefreshCw className="w-4 h-4" /> Regenerate
             </button>
             <button 
               onClick={handlePrint}
-              className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+              className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
             >
               <Printer className="w-4 h-4" /> Print
             </button>
@@ -80,7 +80,7 @@ export default function AssessmentOutput() {
               <PDFDownloadLink
                 document={<AssessmentPDF assessment={generatedAssessment} />}
                 fileName={`${generatedAssessment.schoolName || "Assessment"}.pdf`}
-                className="flex items-center gap-2 px-6 py-2.5 bg-[#1c1c1c] text-white rounded-xl text-sm font-semibold hover:bg-black transition-colors shadow-md disabled:opacity-70"
+                className="w-full md:w-auto flex items-center justify-center gap-2 px-6 py-2.5 bg-[#1c1c1c] text-white rounded-xl text-sm font-semibold hover:bg-black transition-colors shadow-md disabled:opacity-70"
               >
                 {({ loading }) => (
                   <>
@@ -92,7 +92,7 @@ export default function AssessmentOutput() {
             ) : (
               <button 
                 disabled
-                className="flex items-center gap-2 px-6 py-2.5 bg-[#1c1c1c] text-white rounded-xl text-sm font-semibold hover:bg-black transition-colors shadow-md opacity-70"
+                className="w-full md:w-auto flex items-center justify-center gap-2 px-6 py-2.5 bg-[#1c1c1c] text-white rounded-xl text-sm font-semibold hover:bg-black transition-colors shadow-md opacity-70"
               >
                 <Loader2 className="w-4 h-4 animate-spin" /> Preparing PDF...
               </button>
@@ -104,9 +104,9 @@ export default function AssessmentOutput() {
         <div 
           id="pdf-container"
           ref={pdfRef}
-          className="bg-white rounded-none sm:rounded-[2rem] shadow-sm sm:shadow-lg w-full min-h-264 print:shadow-none print:m-0 print:p-0 print:w-full font-sans text-black"
+          className="bg-white rounded-2xl sm:rounded-[2rem] shadow-sm sm:shadow-lg w-full min-h-264 print:shadow-none print:m-0 print:p-0 print:w-full font-sans text-black"
         >
-          <div className="p-10 sm:p-14 print:p-8">
+          <div className="p-4 sm:p-10 md:p-14 print:p-8">
             {/* Exam Header */}
             <div className="text-center mb-8">
               <h1 className="text-2xl font-bold mb-2">

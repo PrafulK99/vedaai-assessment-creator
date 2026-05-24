@@ -14,6 +14,7 @@ export interface AssessmentJobData {
   totalQuestions: number;
   totalMarks: number;
   questionTypes: Array<{ type: string; count: number; marks: number }>;
+  dueDate?: Date;
 }
 
 // Create the assessment generation queue
