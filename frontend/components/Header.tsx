@@ -1,5 +1,6 @@
 import React from "react";
 import { ArrowLeft, Bell, ChevronDown, LayoutGrid, Menu } from "lucide-react";
+import { motion } from "framer-motion";
 
 interface HeaderProps {
   title?: string;
@@ -10,22 +11,26 @@ interface HeaderProps {
 
 export function Header({ title = "Assignment", showBackButton = true, onBackClick, onMenuClick }: HeaderProps) {
   return (
-    <header className="bg-sidebar-bg rounded-3xl p-4 px-6 flex items-center justify-between shadow-sm shrink-0" data-purpose="top-header">
+    <header className="bg-sidebar-bg rounded-[24px] p-4 px-6 flex items-center justify-between shadow-sm shrink-0" data-purpose="top-header">
       {/* Left Section - Menu, Back Button and Title */}
       <div className="flex items-center gap-4 text-text-muted font-medium">
-        <button
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
           onClick={onMenuClick}
           className="lg:hidden hover:text-text-main transition-colors mr-2"
         >
           <Menu className="w-5 h-5" />
-        </button>
+        </motion.button>
         {showBackButton && (
-          <button
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
             onClick={onBackClick}
             className="hover:text-text-main transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
-          </button>
+          </motion.button>
         )}
         {title && (
           <div className="flex items-center gap-2">
@@ -38,13 +43,21 @@ export function Header({ title = "Assignment", showBackButton = true, onBackClic
       {/* Right Section - Notification and Profile */}
       <div className="flex items-center gap-4">
         {/* Notification Bell */}
-        <button className="relative text-text-muted hover:text-text-main transition-colors p-2 bg-white rounded-full shadow-sm w-10 h-10 flex items-center justify-center">
+        <motion.button 
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          className="relative text-text-muted hover:text-text-main transition-colors p-2 bg-white rounded-full shadow-sm w-10 h-10 flex items-center justify-center"
+        >
           <Bell className="w-5 h-5" />
           <span className="absolute top-2 right-2.5 w-2 h-2 bg-orange-accent rounded-full border border-white"></span>
-        </button>
+        </motion.button>
 
         {/* Profile Dropdown */}
-        <div className="flex items-center gap-2 cursor-pointer hover:bg-gray-200/50 p-1.5 pr-3 rounded-full transition-colors bg-white shadow-sm">
+        <motion.div 
+          whileHover={{ scale: 1.02, backgroundColor: "rgba(229, 231, 235, 0.8)" }}
+          whileTap={{ scale: 0.98 }}
+          className="flex items-center gap-2 cursor-pointer p-1.5 pr-3 rounded-full transition-colors bg-white shadow-sm"
+        >
           <img 
             alt="John Doe" 
             className="w-8 h-8 rounded-full" 
@@ -52,7 +65,7 @@ export function Header({ title = "Assignment", showBackButton = true, onBackClic
           />
           <span className="text-sm font-semibold text-text-main">John Doe</span>
           <ChevronDown className="w-3.5 h-3.5 text-text-muted ml-1" />
-        </div>
+        </motion.div>
       </div>
     </header>
   );
