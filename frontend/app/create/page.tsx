@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { MainLayout } from "@/components/MainLayout";
 import { Upload, Calendar, ChevronDown, Minus, Plus, X, Mic, ArrowLeft, ArrowRight } from "lucide-react";
 import { useFormStore, QuestionType } from "@/store/useFormStore";
@@ -43,6 +43,69 @@ export default function CreateAssignment() {
 
   const { setJobId, setStatus, setProgress } = useGenerationStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const recognitionRef = useRef<any>(null);
+  const [isListening, setIsListening] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    };
+  }, []);
+
+  const toggleListening = () => {
+    if (isListening) {
+      recognitionRef.current?.stop();
+      setIsListening(false);
+      return;
+    }
+
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      toast.error("Voice input is not supported in this browser.");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = false;
+
+    recognition.onstart = () => {
+      setIsListening(true);
+      toast.info("Listening... Speak now.", { id: 'mic-toast', duration: 3000 });
+    };
+
+    recognition.onresult = (event: any) => {
+      let finalTranscript = "";
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+          finalTranscript += event.results[i][0].transcript;
+        }
+      }
+      
+      if (finalTranscript) {
+        const currentInstructions = useFormStore.getState().instructions;
+        const newText = currentInstructions ? `${currentInstructions} ${finalTranscript}` : finalTranscript;
+        setField('instructions', newText);
+      }
+    };
+
+    recognition.onerror = (event: any) => {
+      console.error("Speech recognition error", event.error);
+      setIsListening(false);
+      if (event.error !== 'aborted') {
+         toast.error("Microphone error. Please try again.");
+      }
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognitionRef.current = recognition;
+    recognition.start();
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -380,21 +443,36 @@ export default function CreateAssignment() {
 
           {/* Additional Information */}
           <motion.div variants={itemVariants}>
-            <label className="block text-sm font-bold text-gray-900 mb-2">Additional Information (For better output)</label>
-            <div className="relative">
+            <div className="flex justify-between items-end mb-2">
+              <label className="block text-sm font-bold text-gray-900">Additional Information (For better output)</label>
+              {isListening && (
+                <span className="text-xs font-semibold text-orange-500 animate-pulse flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-orange-500"></span> Listening...
+                </span>
+              )}
+            </div>
+            <div className="relative group">
               <textarea 
-                placeholder="e.g Generate a question paper for 3 hour exam duration..." 
+                placeholder={isListening ? "Listening to your instructions..." : "e.g Generate a question paper for 3 hour exam duration..."}
                 value={instructions}
                 onChange={(e) => setField('instructions', e.target.value)}
-                className="w-full bg-white border-2 border-dashed border-gray-200 text-gray-900 text-sm rounded-2xl px-4 py-4 outline-none focus:border-orange-400 focus:ring-0 transition-colors resize-none placeholder:text-gray-400"
+                className={`w-full bg-white border-2 border-dashed ${isListening ? 'border-orange-400 bg-orange-50/30' : 'border-gray-200'} text-gray-900 text-sm rounded-2xl px-4 py-4 pr-14 outline-none focus:border-orange-400 focus:ring-0 transition-colors resize-none ${isListening ? 'placeholder:text-orange-400' : 'placeholder:text-gray-400'}`}
                 rows={3}
               ></textarea>
               <motion.button 
-                whileHover={{ scale: 1.1, backgroundColor: "#E5E7EB" }}
+                whileHover={{ scale: 1.1, backgroundColor: isListening ? "#FFEDD5" : "#E5E7EB" }}
                 whileTap={{ scale: 0.9 }}
-                className="absolute bottom-4 right-4 text-gray-400 transition-colors p-2 bg-gray-100 rounded-full"
+                onClick={(e) => { e.preventDefault(); toggleListening(); }}
+                className={`absolute bottom-4 right-4 transition-colors p-2 rounded-full z-10 ${
+                  isListening 
+                    ? 'bg-orange-100 text-orange-500 shadow-[0_0_15px_rgba(249,115,22,0.2)]' 
+                    : 'bg-gray-100 text-gray-400 hover:text-gray-900'
+                }`}
               >
-                <Mic className="w-4 h-4" />
+                <Mic className="w-4 h-4 relative z-10" />
+                {isListening && (
+                  <span className="absolute inset-0 rounded-full border-2 border-orange-500 opacity-20 animate-ping"></span>
+                )}
               </motion.button>
             </div>
           </motion.div>
