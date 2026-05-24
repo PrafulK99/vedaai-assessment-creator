@@ -1,4 +1,4 @@
-import Redis from "ioredis";
+import { Redis } from "ioredis";
 
 // If REDIS_URL is provided (for Upstash), use it; otherwise use individual parameters
 const redis = process.env.REDIS_URL
@@ -18,7 +18,7 @@ redis.on("connect", () => {
   console.log("✅ Redis connected successfully");
 });
 
-redis.on("error", (err) => {
+redis.on("error", (err: any) => {
   console.error("❌ Redis connection error:", err);
 });
 
